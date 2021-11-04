@@ -3,11 +3,13 @@ const config = require('./config');
 const { tokenTypes } = require('./tokens');
 const { User } = require('../models');
 
+// Strategy Options
 const jwtOptions = {
   secretOrKey: config.jwt.secret,
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 };
 
+// Verify Callback
 const jwtVerify = async (payload, done) => {
   try {
     if (payload.type !== tokenTypes.ACCESS) {
