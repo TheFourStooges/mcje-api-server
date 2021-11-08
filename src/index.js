@@ -15,7 +15,8 @@ const connectDb = async () => {
   }
 
   try {
-    sequelize.sync().then(() => logger.info('Sequelize models synchronized'));
+    await sequelize.sync();
+    logger.info('Sequelize models synchronized');
     await sequelize.authenticate();
     logger.info('Connected to SQL Database via Sequelize ORM');
   } catch (error) {
