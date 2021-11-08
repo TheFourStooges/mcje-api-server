@@ -3,7 +3,7 @@ const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
- * Create a user
+ * Create a user. Noted that the userBody should have been validated by Joi.
  * @param {Object} userBody
  * @returns {Promise<User>}
  */
@@ -34,7 +34,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  return User.findById(id);
+  return User.findByPk(id);
 };
 
 /**
@@ -43,7 +43,7 @@ const getUserById = async (id) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = async (email) => {
-  return User.findOne({ email });
+  return User.findOne({ where: { email } });
 };
 
 /**
@@ -75,7 +75,7 @@ const deleteUserById = async (userId) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  await user.remove();
+  await user.destroy();
   return user;
 };
 
