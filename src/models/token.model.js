@@ -39,6 +39,8 @@ Token.init(
 User.hasMany(Token, {
   foreignKey: 'user',
 });
-Token.belongsTo(User);
+Token.belongsTo(User, {
+  foreignKey: 'user',
+});
 
 module.exports = Token;
