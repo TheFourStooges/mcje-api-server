@@ -29,7 +29,9 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
     const hasRequiredRights = requiredRights.every((requiredRight) => userRights.includes(requiredRight));
     // If the user doesn't have all the rights and if the user requests the profile of another user
     // Logged in users can fetch only their own user information. Only admins can fetch other users.
-    if (!hasRequiredRights && req.params.userId !== user.id) {
+    // Due to changes in the model schema (from `mongoose` to `sequelize`), the typeof id has been changed from
+    // string to number, therefore the !== expression will always evaluates to true
+    if (!hasRequiredRights && req.params.userId !== user.id.toString(10)) {
       // Reject the promise
       return reject(new ApiError(httpStatus.FORBIDDEN, 'Forbidden'));
     }
