@@ -10,14 +10,21 @@ const { roles } = require('../config/roles');
  */
 class User extends Model {
   static async isEmailTaken(email, excludeUserId) {
-    const user = await this.findOne({
-      where: {
-        email,
-        id: {
-          [Op.not]: excludeUserId,
+    let user;
+    if (excludeUserId) {
+      user = await this.findOne({
+        where: {
+          email,
+          [Op.not]: [{ id: excludeUserId }],
         },
-      },
-    });
+      });
+    } else {
+      user = await this.findOne({
+        where: {
+          email,
+        },
+      });
+    }
 
     // https://stackoverflow.com/questions/784929/what-is-the-not-not-operator-in-javascript
     return !!user;
