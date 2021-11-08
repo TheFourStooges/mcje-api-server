@@ -29,8 +29,10 @@ class User extends Model {
    * @returns true or false whether the password matches the hashed password in DB
    */
   async isPasswordMatch(password) {
-    const user = this;
-    return bcrypt.compare(password, user.password);
+    // console.log(this.getDataValue('password'));
+    // console.log(this.scope('withPassword').getDataValue('password'));
+    // console.log(password, this.get('password'));
+    return bcrypt.compare(password, this.get('password'));
   }
 
   // @override
@@ -93,9 +95,15 @@ User.init(
   {
     // Other options
     sequelize,
-    defaultScope: {
-      attributes: { exclude: ['password'] },
-    },
+    // ! BUG ! Find solution ! can't get password from instance level method (isPasswordMatch())
+    // defaultScope: {
+    //   attributes: { exclude: ['password'] },
+    // },
+    // scopes: {
+    //   withPassword: {
+    //     attributes: {},
+    //   },
+    // },
     timestamps: true,
     paranoid: true,
   }

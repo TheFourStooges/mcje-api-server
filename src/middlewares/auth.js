@@ -13,7 +13,11 @@ const { roleRights } = require('../config/roles');
  * @returns a custom passport.authenticate() callback
  */
 const verifyCallback = (req, resolve, reject, requiredRights) => async (err, user, info) => {
+  // console.log("---->", err);
+  // console.log("---->", info);
+  // console.log("---->", user);
   if (err || info || !user) {
+    // console.log('----> 401 ERROR');
     return reject(new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate'));
   }
   req.user = user;
@@ -45,6 +49,7 @@ const verifyCallback = (req, resolve, reject, requiredRights) => async (err, use
 const auth =
   (...requiredRights) =>
   async (req, res, next) => {
+    // console.log("----> ", JSON.stringify(req.headers));
     return new Promise((resolve, reject) => {
       // Authenticate user with strategy 'jwt', session disabled, and with custom callback
       // http://www.passportjs.org/docs/authenticate/
