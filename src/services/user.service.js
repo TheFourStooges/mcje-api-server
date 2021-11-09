@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
-const paginate = require('./paginate');
+const paginate = require('../utils/paginate');
 
 /**
  * Create a user. Noted that the userBody should have been validated by Joi.
