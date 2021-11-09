@@ -4,10 +4,11 @@ const { objectId } = require('./custom.validation');
 const createCategory = {
   body: Joi.object().keys({
     name: Joi.string().required(),
+    slug: Joi.string().required(),
     description: Joi.string(),
     isActive: Joi.boolean(),
     assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
-    parentId: Joi.string.custom(objectId),
+    parentId: Joi.string().custom(objectId),
   }),
 };
 
@@ -16,7 +17,7 @@ const getCategories = {
     name: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
-    parentId: Joi.string.custom(objectId),
+    parentId: Joi.string().custom(objectId),
   }),
 };
 
@@ -33,10 +34,11 @@ const updateCategory = {
   body: Joi.object()
     .keys({
       name: Joi.string().required(),
+      slug: Joi.string().required(),
       description: Joi.string(),
       isActive: Joi.boolean(),
       assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
-      parentId: Joi.string.custom(objectId),
+      parentId: Joi.string().custom(objectId),
     })
     .min(1),
 };

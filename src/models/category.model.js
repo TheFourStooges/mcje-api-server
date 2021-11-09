@@ -1,11 +1,32 @@
-const { DataTypes, Model } = require('sequelize');
+const { DataTypes, Model, Op } = require('sequelize');
 // const slug = require('slug');
 const sequelize = require('../config/sequelize');
 
 /**
  * @typedef Category
  */
-class Category extends Model {}
+class Category extends Model {
+  static async isSlugTaken(slug, excludeCategoryId) {
+    let category;
+    if (excludeCategoryId) {
+      category = await this.findOne({
+        where: {
+          slug,
+          [Op.not]: [{ id: excludeCategoryId }],
+        },
+      });
+    } else {
+      category = await this.findOne({
+        where: {
+          slug,
+        },
+      });
+    }
+
+    // https://stackoverflow.com/questions/784929/what-is-the-not-not-operator-in-javascript
+    return !!category;
+  }
+}
 
 Category.init(
   {
