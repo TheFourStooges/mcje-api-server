@@ -1,5 +1,6 @@
 const Joi = require('joi');
-const { objectId } = require('./custom.validation');
+const { objectId, id } = require('./custom.validation');
+const regexPatterns = require('../config/regexPatterns');
 
 const createCategory = {
   body: Joi.object().keys({
@@ -8,13 +9,15 @@ const createCategory = {
     description: Joi.string(),
     isActive: Joi.boolean(),
     assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
-    parentId: Joi.string().custom(objectId),
+    parentId: id,
   }),
 };
 
 const getCategories = {
   query: Joi.object().keys({
     name: Joi.string(),
+    slug: Joi.string().regex(regexPatterns.slug),
+    webId: Joi.string().regex(regexPatterns.uuidv4),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     parentId: Joi.string().custom(objectId),
