@@ -1,6 +1,7 @@
 const { DataTypes, Model, Op } = require('sequelize');
 // const slug = require('slug');
 const sequelize = require('../config/sequelize');
+const regexPatterns = require('../config/regexPatterns');
 
 /**
  * @typedef Category
@@ -45,7 +46,7 @@ Category.init(
       allowNull: false,
       unique: true,
       validate: {
-        is: /^[^\s!?/.*#|]+$/i,
+        is: regexPatterns.slug,
       },
     },
     description: {
@@ -67,9 +68,11 @@ Category.init(
 
 Category.hasMany(Category, {
   foreignKey: 'parentId',
+  as: 'children',
 });
 Category.belongsTo(Category, {
   foreignKey: 'parentId',
+  as: 'parent',
 });
 
 module.exports = Category;

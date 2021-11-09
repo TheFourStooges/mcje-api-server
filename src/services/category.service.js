@@ -8,12 +8,36 @@ const paginate = require('../utils/paginate');
  * @param {Object} categoryBody
  * @returns {Promise<Category>}
  */
-const createCategory = async (userBody) => {
-  return Category.create(userBody);
+const createCategory = async (categoryBody) => {
+  if (await Category.isSlugTaken(categoryBody.slug)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Slug already taken');
+  }
+
+  // Extract the parentId from Body for pre-processing
+  const { parentId, ...restOfBody } = categoryBody;
+
+  // console.log('---->', parentId);
+  // console.log('---->', restOfBody);
+
+  // Build the new Category instance without parentId
+  const category = Category.build(restOfBody);
+
+  // If parentId object exists
+  if (parentId) {
+    // Find the parent Category instance...
+    const parentCategory = await Category.findOne({ where: parentId });
+    // And extracts its PRIMARY KEY...
+    const parentSqlId = parentCategory.get('id');
+    // Then sets it as the new Category parentId.
+    category.set('parentId', parentSqlId);
+  }
+
+  // Save and commit to database
+  return category.save();
 };
 
 /**
- * Query for users
+ * Query for categories
  * @param {Object} filter - Mongo filter
  * @param {Object} options - Query options
  * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
@@ -67,7 +91,15 @@ const updateCategoryById = async (categoryId, updateBody) => {
   if (updateBody.slug && (await Category.isSlugTaken(updateBody.slug, categoryId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Slug already taken');
   }
-  Object.assign(category, updateBody);
+
+  const { parentId, ...restOfBody } = updateBody;
+  if (parentId) {
+    const parentCategory = await Category.findOne({ where: parentId });
+    const parentSqlId = parentCategory.get('id');
+    category.set('parentId', parentSqlId);
+  }
+
+  Object.assign(category, restOfBody);
   await category.save();
   return category;
 };
