@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const paginate = require('./paginate');
 
 /**
  * Create a user. Noted that the userBody should have been validated by Joi.
@@ -24,7 +25,7 @@ const createUser = async (userBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryUsers = async (filter, options) => {
-  const users = await User.paginate(filter, options);
+  const users = await paginate(User, filter, options);
   return users;
 };
 
