@@ -1,5 +1,6 @@
 /**
  * Query for a set of tuples, paginate it and return
+ * @param {Model}  [model] A sequelize model
  * @param {Object} [whereClause] Sequelize query WHERE clause. See https://sequelize.org/master/manual/model-querying-basics.html#applying-where-clauses
  * @param {Object} [options] Query options
  * @param {string} [options.sortBy] - Sorting criteria using the format: sortField:(desc|asc). Multiple sorting criteria should be separated by commas (,)
