@@ -5943,6 +5943,11 @@
   "resolved" "https://registry.npmjs.org/sliced/-/sliced-1.0.1.tgz"
   "version" "1.0.1"
 
+"slug@^5.1.0":
+  "integrity" "sha512-IS39jKR6m+puU8zWgH6ruwx1sfzFNJ6Ai5PKIlUqd0X8C3ca7PB49Cvm0uayqgEt1jgaojO2wWEsQJngnh7fDA=="
+  "resolved" "https://registry.npmjs.org/slug/-/slug-5.1.0.tgz"
+  "version" "5.1.0"
+
 "smart-buffer@^4.1.0":
   "integrity" "sha512-94hK0Hh8rPqQl2xXc3HsaBoOXKV20MToPkcXvwbISWLEs+64sBq5kFgn2kJDHb1Pry9yrP0dxrCI9RRci7RXKg=="
   "resolved" "https://registry.npmjs.org/smart-buffer/-/smart-buffer-4.2.0.tgz"
