@@ -1,6 +1,3 @@
-const Joi = require('joi');
-const regexPatterns = require('../config/regexPatterns');
-
 const objectId = (value, helpers) => {
   // const pattern = /^[0-9a-fA-F]{24}$/;
   const pattern = /^[0-9a-fA-f]$/;
@@ -10,16 +7,6 @@ const objectId = (value, helpers) => {
   }
   return value;
 };
-
-const id = Joi.object()
-  .keys({
-    id: Joi.number().integer().min(1),
-    webId: Joi.string().regex(regexPatterns.uuidv4),
-    slug: Joi.string().regex(regexPatterns.slug),
-  })
-  .oxor('id', 'webId', 'slug');
-// object.oxor(...peers, [options]) : Defines an exclusive relationship between a set of keys
-// where only one is allowed but none are required
 
 const password = (value, helpers) => {
   if (value.length < 8) {
@@ -33,6 +20,5 @@ const password = (value, helpers) => {
 
 module.exports = {
   objectId,
-  id,
   password,
 };
