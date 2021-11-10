@@ -2,12 +2,18 @@ const regexPatterns = require('../config/regexPatterns');
 
 const objectId = (value, helpers) => {
   // const pattern = /^[0-9a-fA-F]{24}$/;
-  const pattern = regexPatterns.uuidv4;
+  const pattern1 = regexPatterns.uuidv4;
+  const pattern2 = regexPatterns.slug;
 
-  if (!value.match(pattern)) {
-    return helpers.message('"{{#label}}" must be a valid uuid');
+  if (value.match(pattern1) || value.match(pattern2)) {
+    return value;
   }
-  return value;
+  return helpers.message('"{{#label}}" must be a valid uuid or a valid slug');
+
+  // if (!value.match(pattern)) {
+  //   return helpers.message('"{{#label}}" must be a valid uuid');
+  // }
+  // return value;
 };
 
 const password = (value, helpers) => {
