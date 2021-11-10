@@ -1,9 +1,11 @@
+const regexPatterns = require('../config/regexPatterns');
+
 const objectId = (value, helpers) => {
   // const pattern = /^[0-9a-fA-F]{24}$/;
-  const pattern = /^[0-9a-fA-f]$/;
+  const pattern = regexPatterns.uuidv4;
 
   if (!value.match(pattern)) {
-    return helpers.message('"{{#label}}" must be a valid mongo id');
+    return helpers.message('"{{#label}}" must be a valid uuid');
   }
   return value;
 };
