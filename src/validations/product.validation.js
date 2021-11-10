@@ -1,12 +1,11 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
-const { idUnionSchema, slug } = require('./schemas');
+const { idUnionSchema, slugSchema } = require('./schemas');
 const regexPatterns = require('../config/regexPatterns');
 
 const optionSchema = Joi.object().keys({
   name: Joi.string().required(),
   priceOffset: Joi.number().precision(2),
-  quantity: Joi.number().integer(),
   assets: Joi.array().items(idUnionSchema).min(1).unique,
 });
 
@@ -27,7 +26,7 @@ const createProduct = {
     categoryId: idUnionSchema,
     basePrice: Joi.number().precision(2).positive(),
     // https://stackoverflow.com/questions/54483904/how-to-use-joi-to-validate-map-object-map-keys-and-map-values
-    attributes: Joi.object().pattern(slug, slug),
+    attributes: Joi.object().pattern(slugSchema, slugSchema),
     optionGroups: Joi.array().items(optionGroupSchema),
     assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
     parentId: idUnionSchema,

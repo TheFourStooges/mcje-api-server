@@ -1,5 +1,6 @@
 const Joi = require('joi');
-const { objectId, id } = require('./custom.validation');
+const { objectId } = require('./custom.validation');
+const { idUnionSchema } = require('./schemas');
 const regexPatterns = require('../config/regexPatterns');
 
 const createCategory = {
@@ -9,7 +10,7 @@ const createCategory = {
     description: Joi.string(),
     isActive: Joi.boolean(),
     assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
-    parentId: id,
+    parentId: idUnionSchema,
   }),
 };
 
@@ -41,7 +42,7 @@ const updateCategory = {
       description: Joi.string(),
       isActive: Joi.boolean(),
       assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
-      parentId: id,
+      parentId: idUnionSchema,
     })
     .min(1),
 };
