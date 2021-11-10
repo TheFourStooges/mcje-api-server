@@ -57,6 +57,13 @@ class User extends Model {
 
 User.init(
   {
+    id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      unique: true,
+      primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: false,
