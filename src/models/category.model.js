@@ -31,10 +31,11 @@ class Category extends Model {
 
 Category.init(
   {
-    webId: {
+    id: {
       type: DataTypes.UUID,
       allowNull: false,
       unique: true,
+      primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
     },
     name: {
