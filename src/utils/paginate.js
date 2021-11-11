@@ -1,15 +1,15 @@
 /**
  * Query for a set of tuples, paginate it and return
- * @param {Model}  [model] A sequelize model
- * @param {Object} [whereClause] Sequelize query WHERE clause. See https://sequelize.org/master/manual/model-querying-basics.html#applying-where-clauses
- * @param {Object} [options] Query options
+ * @param {Model}  [model] - A sequelize model
+ * @param {Object} [whereClause] - Sequelize query WHERE clause. See https://sequelize.org/master/manual/model-querying-basics.html#applying-where-clauses
+ * @param {Object} [options] - Query options
  * @param {string} [options.sortBy] - Sorting criteria using the format: sortField:(desc|asc). Multiple sorting criteria should be separated by commas (,)
- * @param {string} [options.populate] - Populate data fields. Hierarchy of fields should be separated by (.). Multiple populating criteria should be separated by commas (,)
  * @param {number} [options.limit] - Maximum number of results per page (default = 10)
  * @param {number} [options.page] - Current page (default = 1)
+ * @param {Array<Object|Model|string>} [eagerLoadInclude] - Sequelize options.include clause. See https://sequelize.org/master/class/lib/model.js~Model.html#static-method-findAll
  * @returns
  */
-const paginate = async (model, whereClause, options) => {
+const paginate = async (model, whereClause, options, eagerLoadInclude) => {
   // Split `options.sortBy` string into an array of items to pass into Sequelize's `order` option
   // See: https://sequelize.org/master/manual/model-querying-basics.html#ordering
   // The `order` option takes an array of items to order the query by.
@@ -65,6 +65,7 @@ const paginate = async (model, whereClause, options) => {
 
   const { count, rows } = await model.findAndCountAll({
     where: whereClause,
+    include: eagerLoadInclude,
     order: sort,
     offset: skip,
     limit,
