@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
-const sequelize = require('../config/sequelize');
-const { Product, ProductOptionGroup, ProductOption } = require('../models');
+// const sequelize = require('../config/sequelize');
+const { sequelize, Product, ProductOptionGroup, ProductOption } = require('../models');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
 

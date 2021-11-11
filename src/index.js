@@ -1,8 +1,8 @@
 // const mongoose = require('mongoose');
-const sequelize = require('./config/sequelize');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
+const { sequelize, User } = require('./models');
 
 let server;
 
@@ -15,10 +15,22 @@ const connectDb = async () => {
   // }
 
   try {
-    await sequelize.sync();
+    // REMEMBER TO CHANGE TO FALSE AFTER!!!!
+    const force = false;
+
+    await sequelize.sync({ force });
     logger.info('Sequelize models synchronized');
     await sequelize.authenticate();
     logger.info('Connected to SQL Database via Sequelize ORM');
+    // eslint-disable-next-line no-unused-expressions
+    force &&
+      (await User.create({
+        email: 'admin@example.com',
+        password: 'password1',
+        name: 'admin',
+        role: 'admin',
+      }));
+    logger.info('Created administrator account --> admin:admin');
   } catch (error) {
     throw Error('Error while establishing connection with SQL database');
   }

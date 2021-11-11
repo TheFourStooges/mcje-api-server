@@ -1,46 +1,47 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/sequelize');
+const { Model } = require('sequelize');
+// const sequelize = require('../config/sequelize');
 const { tokenTypes } = require('../config/tokens');
-const User = require('./user.model');
+// const User = require('./user.model');
 
-/**
- * @typedef Token
- */
-class Token extends Model {}
+module.exports = (sequelize, DataTypes) => {
+  /**
+   * @typedef Token
+   */
+  class Token extends Model {}
 
-Token.init(
-  {
-    token: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      unique: true,
+  Token.init(
+    {
+      token: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
+      type: {
+        type: DataTypes.ENUM,
+        values: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL],
+        allowNull: false,
+      },
+      expires: {
+        type: DataTypes.DATE,
+        allowNull: false,
+      },
+      blacklisted: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
-    type: {
-      type: DataTypes.ENUM,
-      values: [tokenTypes.REFRESH, tokenTypes.RESET_PASSWORD, tokenTypes.VERIFY_EMAIL],
-      allowNull: false,
-    },
-    expires: {
-      type: DataTypes.DATE,
-      allowNull: false,
-    },
-    blacklisted: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-  },
-  {
-    sequelize,
-    timestamps: true,
-    paranoid: true,
-  }
-);
+    {
+      sequelize,
+      timestamps: true,
+      paranoid: true,
+    }
+  );
 
-User.hasMany(Token, {
-  foreignKey: 'user',
-});
-Token.belongsTo(User, {
-  foreignKey: 'user',
-});
+  Token.associate = (models) => {
+    Token.belongsTo(models.User, {
+      foreignKey: 'user',
+    });
+  };
 
-module.exports = Token;
+  return Token;
+};
