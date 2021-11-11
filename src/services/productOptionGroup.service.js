@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 // const sequelize = require('../config/sequelize');
 const { sequelize, Product, ProductOptionGroup, ProductOption } = require('../models');
+const productService = require('./product.service');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
 
@@ -10,50 +11,79 @@ const paginate = require('../utils/paginate');
  * @returns {Promise<Product>}
  */
 const createProductOptionGroup = async (productId, optionGroupBody) => {
-  // if (await Product.isSlugTaken(productBody.slug)) {
-  //   throw new ApiError(httpStatus.BAD_REQUEST, 'Slug already taken');
-  // }
-
-  // Extract the `options` ProductOption array from body
-  const { options, ...restOfBody } = optionGroupBody;
-
-  // Declare new transaction
-  const t = await sequelize.transaction();
-
-  let optionGroupId;
-
-  try {
-    // create the ProductOptionGroup instance
-    const optionGroupInstance = await ProductOptionGroup.create({ ...restOfBody, productId }, { transaction: t });
-    // Extract its generated id
-    optionGroupId = optionGroupInstance.get('id');
-
-    // For each option in the `options` array, create a new ProductOption instance with the FK referring to
-    // the `optionGroupId`
-
-    // forEach and awaits DOES NOT WORK
-    // See: https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
-    // options.forEach(async (option) => {
-    //   await ProductOption.create({ ...option, optionGroupId }, { transaction: t });
-    // });
-
-    // https://stackoverflow.com/questions/61369310/sequelize-transactions-inside-foreach-issue
-    // eslint-disable-next-line no-restricted-syntax
-    for (const option of options) {
-      // eslint-disable-next-line no-await-in-loop
-      await ProductOption.create({ ...option, optionGroupId }, { transaction: t });
-    }
-
-    await t.commit();
-  } catch (error) {
-    await t.rollback();
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error: ${error}. Query: ${error.sql}. Transaction rolled back.`);
+  if (await ProductOptionGroup.isSlugTaken(optionGroupBody.slug, productId)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Slug already taken');
   }
 
-  // Eager load the newly created ProductOptionGroup using the optionGroupId
-  console.log('---->', JSON.stringify(await ProductOption.findAll({ where: { optionGroupId } }), null, 4));
+  const product = await productService.getProductById(productId);
 
-  return ProductOptionGroup.findOne({ where: { id: optionGroupId } }, { include: { model: ProductOption, as: 'options' } });
+  if (!product) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
+  }
+
+  const optionGroup = await ProductOptionGroup.create(
+    {
+      ...optionGroupBody,
+      productId,
+    },
+    {
+      include: [{ model: ProductOption, as: 'options' }],
+    }
+  );
+
+  return optionGroup;
+
+  // // ============= Manual implementation of 'Creating with Association' ============ DEPRECATED
+  // // Extract the `options` ProductOption array from body
+  // const { options, ...restOfBody } = optionGroupBody;
+
+  // // Declare new transaction
+  // const t = await sequelize.transaction();
+
+  // let optionGroupInstance;
+  // let optionGroupId;
+
+  // try {
+  //   // create the ProductOptionGroup instance
+  //   optionGroupInstance = await ProductOptionGroup.create({ ...restOfBody, productId }, { transaction: t });
+  //   // Extract its generated id
+  //   optionGroupId = optionGroupInstance.get('id');
+
+  //   // For each option in the `options` array, create a new ProductOption instance with the FK referring to
+  //   // the `optionGroupId`
+
+  //   // forEach and awaits DOES NOT WORK
+  //   // See: https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
+  //   // options.forEach(async (option) => {
+  //   //   await ProductOption.create({ ...option, optionGroupId }, { transaction: t });
+  //   // });
+
+  //   // https://stackoverflow.com/questions/61369310/sequelize-transactions-inside-foreach-issue
+  //   // eslint-disable-next-line no-restricted-syntax
+  //   for (const option of options) {
+  //     // eslint-disable-next-line no-await-in-loop
+  //     await ProductOption.create({ ...option, optionGroupId }, { transaction: t });
+  //   }
+
+  //   await t.commit();
+  // } catch (error) {
+  //   await t.rollback();
+  //   throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error: ${error}. Query: ${error.sql}. Transaction rolled back.`);
+  // }
+  // // ====================================================================
+
+  // SHITTY EAGER LOADING IMPLEMENTATION
+  // const optionInstances = await ProductOption.findAll({ where: { optionGroupId } });
+  // optionGroupInstance.dataValues.options = optionInstances;
+  // // console.log(optionGroupInstance);
+
+  // return optionGroupInstance;
+
+  // Eager load the newly created ProductOptionGroup using the optionGroupId
+  // console.log('---->', JSON.stringify(await ProductOption.findAll({ where: { optionGroupId } }), null, 4));
+  // console.log('----> !!!', await optionGroupInstance.getOption());
+
+  // return ProductOptionGroup.findOne({ where: { id: optionGroupId }, include: { model: ProductOption, as: 'options' } });
 
   // return Product.create(productBody);
 
@@ -86,9 +116,14 @@ const createProductOptionGroup = async (productId, optionGroupBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryProductOptionGroups = async (filter, options) => {
-  const users = await paginate(ProductOptionGroup, filter, options);
-  return users;
+const queryProductOptionGroups = async (filter, options, productId) => {
+  const filterWithProductId = { ...filter, productId };
+  // Also eager loads ProductOption as 'options'
+  // https://sequelize.org/master/class/lib/model.js~Model.html#static-method-findAll
+  const optionGroups = await paginate(ProductOptionGroup, filterWithProductId, options, [
+    { model: ProductOption, as: 'options' },
+  ]);
+  return optionGroups;
 };
 
 /**
@@ -96,8 +131,8 @@ const queryProductOptionGroups = async (filter, options) => {
  * @param {ObjectId} id
  * @returns {Promise<Product>}
  */
-const getProductById = async (id) => {
-  return Product.findByPk(id);
+const getProductOptionGroupById = async (id, productId) => {
+  return ProductOptionGroup.findOne({ where: { id, productId }, include: { model: ProductOption, as: 'options' } });
 };
 
 /**
@@ -105,8 +140,8 @@ const getProductById = async (id) => {
  * @param {string} slug
  * @returns {Promise<Product>}
  */
-const getProductBySlug = async (slug) => {
-  return Product.findOne({ where: { slug } });
+const getProductOptionGroupBySlug = async (slug, productId) => {
+  return ProductOptionGroup.findOne({ where: { slug, productId }, include: { model: ProductOption, as: 'options' } });
 };
 
 // /**
@@ -124,31 +159,55 @@ const getProductBySlug = async (slug) => {
  * @param {Object} updateBody
  * @returns {Promise<Product>}
  */
-const updateProductById = async (productId, updateBody) => {
-  const product = await getProductById(productId);
-  if (!product) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
+const updateProductOptionGroupById = async (productId, optionGroupId, updateBody) => {
+  // const optionGroup = await ProductOptionGroup.findOne({ where: { id: optionGroupId, productId } });
+  const optionGroup = await getProductOptionGroupById(optionGroupId, productId);
+  if (!optionGroup) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Product Option Group not found for this Product');
   }
-  if (updateBody.slug && (await Product.isSlugTaken(updateBody.slug, productId))) {
+  if (updateBody.slug && (await Product.isSlugTaken(updateBody.slug, productId, optionGroupId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Slug already taken');
   }
 
-  // Extract the categoryId from Body for pre-processing
-  const { categoryId, ...restOfBody } = updateBody;
+  const { options, ...restOfBody } = updateBody;
 
-  // If categoryId object exists
-  if (categoryId) {
-    // Find the parent Category instance...
-    const parentCategory = await Category.findOne({ where: categoryId });
-    // And extracts its PRIMARY KEY...
-    const parentSqlId = parentCategory.get('id');
-    // Then sets it as the new Product categoryId.
-    product.set('categoryId', parentSqlId);
+  const t = await sequelize.transaction();
+  try {
+    // If options[] is provided with request, meaning the old ProductOption list must be deleted to be
+    // replace with the new list
+    if (options) {
+      // Delete old ProductOptions that belongs to this optionGroupId
+      await ProductOption.destroy({ where: { optionGroupId } });
+
+      // Create new options (provided by user in parallel)
+      await Promise.all(options.map(async (option) => ProductOption.create({ ...option, optionGroupId })));
+    }
+
+    // Assign modified fields to the existing instance
+    Object.assign(optionGroup, restOfBody);
+    await optionGroup.save();
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error: ${error}. Transaction rolled back`);
   }
 
-  Object.assign(product, restOfBody);
-  await product.save();
-  return product;
+  // Extract the categoryId from Body for pre-processing
+  // const { categoryId, ...restOfBody } = updateBody;
+
+  // // If categoryId object exists
+  // if (categoryId) {
+  //   // Find the parent Category instance...
+  //   const parentCategory = await Category.findOne({ where: categoryId });
+  //   // And extracts its PRIMARY KEY...
+  //   const parentSqlId = parentCategory.get('id');
+  //   // Then sets it as the new Product categoryId.
+  //   optionGroup.set('categoryId', parentSqlId);
+  // }
+
+  // Object.assign(optionGroup, restOfBody);
+  // await optionGroup.save();
+  return optionGroup.reload();
 };
 
 /**
@@ -156,21 +215,32 @@ const updateProductById = async (productId, updateBody) => {
  * @param {ObjectId} userId
  * @returns {Promise<Product>}
  */
-const deleteProductById = async (productId) => {
-  const category = await getProductById(productId);
-  if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
+const deleteProductOptionGroup = async (productId, optionGroupId) => {
+  const optionGroup = await getProductOptionGroupById(optionGroupId, productId);
+  if (!optionGroup) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Product Option Group not found for this Product');
   }
-  await category.destroy();
-  return category;
+
+  const t = await sequelize.transaction();
+  try {
+    await ProductOption.destroy({ where: { optionGroupId } });
+    await optionGroup.destroy();
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Error: ${error}. Transaction rolled back`);
+  }
+
+  await optionGroup.destroy();
+  return optionGroup;
 };
 
 module.exports = {
   createProductOptionGroup,
   queryProductOptionGroups,
-  getProductById,
-  getProductBySlug,
+  getProductOptionGroupById,
+  getProductOptionGroupBySlug,
   // getCategoryByWebId,
-  updateProductById,
-  deleteProductById,
+  updateProductOptionGroupById,
+  deleteProductOptionGroup,
 };

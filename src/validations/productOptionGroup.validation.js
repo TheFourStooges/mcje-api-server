@@ -49,6 +49,7 @@ const updateProductOptionGroup = {
   body: Joi.object()
     .keys({
       name: Joi.string(),
+      slug: Joi.string().regex(regexPatterns.slug),
       // https://stackoverflow.com/questions/42656549/joi-validation-of-array
       options: Joi.array().items(productOptionSchema).min(1).unique('name'),
     })

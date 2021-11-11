@@ -12,34 +12,41 @@ const createProductOptionGroup = catchAsync(async (req, res) => {
 const getProductOptionGroups = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'slug']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await productOptionGroupService.queryProductOptionGroups(filter, options);
+  const result = await productOptionGroupService.queryProductOptionGroups(filter, options, req.params.productId);
   res.send(result);
 });
 
 const getProductOptionGroup = catchAsync(async (req, res) => {
   // console.log('---->', req.body);
   // const category = await productOptionGroupService.getProductById(req.params.productId);
-  let category;
+  let optionGroup;
 
   if (req.body.type === 'slug') {
-    category = await productOptionGroupService.getProductBySlug(req.params.productId);
+    optionGroup = await productOptionGroupService.getProductOptionGroupBySlug(
+      req.params.optionGroupId,
+      req.params.productId
+    );
   } else {
-    category = await productOptionGroupService.getProductById(req.params.productId);
+    optionGroup = await productOptionGroupService.getProductOptionGroupById(req.params.optionGroupId, req.params.productId);
   }
 
-  if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
+  if (!optionGroup) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Product Option Group not found for this Product');
   }
-  res.send(category);
+  res.send(optionGroup);
 });
 
 const updateProductOptionGroup = catchAsync(async (req, res) => {
-  const category = await productOptionGroupService.updateProductById(req.params.productId, req.body);
-  res.send(category);
+  const optionGroup = await productOptionGroupService.updateProductOptionGroupById(
+    req.params.productId,
+    req.params.optionGroupId,
+    req.body
+  );
+  res.send(optionGroup);
 });
 
 const deleteProductOptionGroup = catchAsync(async (req, res) => {
-  await productOptionGroupService.deleteProductById(req.params.productId);
+  await productOptionGroupService.deleteProductOptionGroup(req.params.productId, req.params.optionGroupId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
