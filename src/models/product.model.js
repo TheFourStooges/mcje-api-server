@@ -3,7 +3,8 @@ const { DataTypes, Model, Op } = require('sequelize');
 const sequelize = require('../config/sequelize');
 const regexPatterns = require('../config/regexPatterns');
 const Category = require('./category.model');
-const ProductVariant = require('./productVariant.model');
+const ProductOptionGroup = require('./productOptionGroup.model');
+// const ProductVariant = require('./productVariant.model');
 
 /**
  * @typedef Product
@@ -82,6 +83,17 @@ Product.belongsTo(Category, {
 Category.hasMany(Product, {
   foreignKey: {
     name: 'categoryId',
+  },
+});
+
+Product.hasMany(ProductOptionGroup, {
+  foreignKey: {
+    name: 'productId',
+  },
+});
+ProductOptionGroup.belongsTo(Product, {
+  foreignKey: {
+    name: 'productId',
   },
 });
 

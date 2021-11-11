@@ -20,6 +20,11 @@ ProductOption.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: false,
+    },
     isActive: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
