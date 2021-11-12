@@ -17,20 +17,20 @@ const getProductAttributes = catchAsync(async (req, res) => {
 });
 
 const getProductAttribute = catchAsync(async (req, res) => {
-  const category = await productAttributeService.getCategoryById(req.params.attributeId);
+  const category = await productAttributeService.getProductAttributeById(req.params.attributeId);
   if (!category) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'ProductAttribute not found');
   }
   res.send(category);
 });
 
 const updateProductAttribute = catchAsync(async (req, res) => {
-  const category = await productAttributeService.updateCategoryById(req.params.attributeId, req.body);
+  const category = await productAttributeService.updateProductAttributeById(req.params.attributeId, req.body);
   res.send(category);
 });
 
 const deleteProductAttribute = catchAsync(async (req, res) => {
-  await productAttributeService.deleteCategoryById(req.params.attributeId);
+  await productAttributeService.deleteProductAttributeById(req.params.attributeId);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

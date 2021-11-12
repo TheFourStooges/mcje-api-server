@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { Sequelize } = require('sequelize');
 const logger = require('../config/logger');
+const config = require('../config/config');
 
 const basename = path.basename(module.filename);
 // const env = process.env.NODE_ENV || 'development';
@@ -12,9 +13,10 @@ const db = {};
 
 // Folder structure based on https://github.com/williampruden/sequelize-associations
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: `${__dirname}/../../db.sqlite3`,
+const sequelize = new Sequelize(config.sequelize.database, config.sequelize.username, config.sequelize.password, {
+  host: '192.168.1.200',
+  dialect: 'mysql',
+  logging: logger.debug.bind(logger),
 });
 
 // eslint-disable-next-line security/detect-non-literal-fs-filename

@@ -3,12 +3,72 @@ const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const productValidation = require('../../validations/product.validation');
 const productController = require('../../controllers/product.controller');
+
 const productOptionGroupValidation = require('../../validations/productOptionGroup.validation');
 const productOptionGroupController = require('../../controllers/productOptionGroup.controller');
+
 const productAttributeValidation = require('../../validations/productAttribute.validation');
 const productAttributeController = require('../../controllers/productAttribute.controller');
 
+const productAttributeOptionValidation = require('../../validations/productAttributeOption.validation');
+const productAttributeOptionController = require('../../controllers/productAttributeOption.controller');
+
 const router = express.Router();
+
+// /product/attribute
+router
+  .route('/attribute')
+  .post(
+    auth('manageProducts'),
+    validate(productAttributeValidation.createProductAttribute),
+    productAttributeController.createProductAttribute
+  )
+  .get(validate(productAttributeValidation.getProductAttributes), productAttributeController.getProductAttributes);
+
+// /product/attribute/{attributeId}
+router
+  .route('/attribute/:attributeId')
+  .get(validate(productAttributeValidation.getProductAttribute), productAttributeController.getProductAttribute)
+  .patch(
+    auth('manageProducts'),
+    validate(productAttributeValidation.updateProductAttribute),
+    productAttributeController.updateProductAttribute
+  )
+  .delete(
+    auth('manageProducts'),
+    validate(productAttributeValidation.deleteProductAttribute),
+    productAttributeController.deleteProductAttribute
+  );
+
+// /product/attribute/{attributeId}/attribute_option
+router
+  .route('/attribute/:attributeId/attribute_option')
+  .post(
+    auth('manageProducts'),
+    validate(productAttributeOptionValidation.createProductAttributeOption),
+    productAttributeOptionController.createProductAttributeOption
+  )
+  .get(
+    validate(productAttributeOptionValidation.getProductAttributeOptions),
+    productAttributeOptionController.getProductAttributeOptions
+  );
+// /product/attribute/{attributeId}/attribute_option/{attributeOptionId}
+router
+  .route('/attribute/:attributeId/attribute_option/:attributeOptionId')
+  .get(
+    validate(productAttributeOptionValidation.getProductAttributeOption),
+    productAttributeOptionController.getProductAttributeOption
+  )
+  .patch(
+    auth('manageProducts'),
+    validate(productAttributeOptionValidation.updateProductAttributeOption),
+    productAttributeOptionController.updateProductAttributeOption
+  )
+  .delete(
+    auth('manageProducts'),
+    validate(productAttributeOptionValidation.deleteProductAttributeOption),
+    productAttributeOptionController.deleteProductAttributeOption
+  );
 
 // /product
 router
@@ -33,7 +93,7 @@ router
   )
   .get(validate(productOptionGroupValidation.getProductOptionGroups), productOptionGroupController.getProductOptionGroups);
 
-// /product/{productId}/option_group
+// /product/{productId}/option_group/{optionGroupId}
 router
   .route('/:productId/option_group/:optionGroupId')
   .get(validate(productOptionGroupValidation.getProductOptionGroup), productOptionGroupController.getProductOptionGroup)
@@ -46,31 +106,6 @@ router
     auth('manageProducts'),
     validate(productOptionGroupValidation.deleteProductOptionGroup),
     productOptionGroupController.deleteProductOptionGroup
-  );
-
-// /product/attribute
-router
-  .route('/attribute')
-  .post(
-    auth('manageProducts'),
-    validate(productAttributeValidation.createProductAttribute),
-    productAttributeController.createProduct
-  )
-  .get(validate(productAttributeValidation.getProductAttributes), productAttributeController.getProducts);
-
-// /product/attribute/{attributeId}
-router
-  .route('/attribute/:attributeId')
-  .get(validate(productAttributeValidation.getProductAttribute), productAttributeController.getProduct)
-  .patch(
-    auth('manageProducts'),
-    validate(productAttributeValidation.updateProductAttribute),
-    productAttributeController.updateProduct
-  )
-  .delete(
-    auth('manageProducts'),
-    validate(productAttributeValidation.deleteProductAttribute),
-    productAttributeController.deleteProduct
   );
 
 module.exports = router;

@@ -13,7 +13,22 @@ const createProductAttribute = async (attributeBody) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Slug already taken');
   }
 
-  return ProductAttribute.create(attributeBody, { include: [{ model: ProductAttributeOption, as: 'attributeOptions' }] });
+  const t = await sequelize.transaction();
+  let productAttribute;
+
+  try {
+    productAttribute = await ProductAttribute.create(attributeBody, {
+      transaction: t,
+      include: [{ model: ProductAttributeOption, as: 'attributeOptions' }],
+    });
+
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Transaction Error: ${error}`);
+  }
+
+  return productAttribute;
 };
 
 /**
@@ -68,7 +83,7 @@ const updateProductAttributeById = async (attributeId, updateBody) => {
 
   const { attributeOptions, ...restOfBody } = updateBody;
 
-  const t = sequelize.transaction();
+  const t = await sequelize.transaction();
   try {
     if (attributeOptions) {
       await ProductAttributeOption.destroy({ where: { attributeId } });
@@ -99,7 +114,18 @@ const deleteProductAttributeById = async (attributeId) => {
   if (!attribute) {
     throw new ApiError(httpStatus.NOT_FOUND, 'ProductAttribute not found');
   }
-  await attribute.destroy();
+
+  const t = await sequelize.transaction();
+  try {
+    await ProductAttributeOption.destroy({ where: { attributeId } });
+    await attribute.destroy();
+
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `Transaction Error: ${error}`);
+  }
+
   return attribute;
 };
 

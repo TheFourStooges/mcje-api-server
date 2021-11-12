@@ -6,25 +6,34 @@ module.exports = (sequelize, DataTypes) => {
    * @typedef ProductAttributeOption
    */
   class ProductAttributeOption extends Model {
-    static async isSlugTaken(slug, excludeAttrOptionId) {
-      let attrOption;
-      if (excludeAttrOptionId) {
-        attrOption = await this.findOne({
+    /**
+     * Returns true if there exists same slug in the same attributeId!
+     * @param {*} slug - slug string
+     * @param {*} attributeId - attributeId as namespace to check against
+     * @param {*} excludeAttributeOptionId - exclude this id
+     * @returns {Boolean} true if exists same slug in the same attributeId
+     */
+    static async isSlugTaken(slug, attributeId, excludeAttributeOptionId) {
+      let optionGroup;
+      if (excludeAttributeOptionId) {
+        optionGroup = await this.findOne({
           where: {
             slug,
-            [Op.not]: [{ id: excludeAttrOptionId }],
+            attributeId,
+            [Op.not]: [{ id: excludeAttributeOptionId }],
           },
         });
       } else {
-        attrOption = await this.findOne({
+        optionGroup = await this.findOne({
           where: {
             slug,
+            attributeId,
           },
         });
       }
 
       // https://stackoverflow.com/questions/784929/what-is-the-not-not-operator-in-javascript
-      return !!attrOption;
+      return !!optionGroup;
     }
   }
 
@@ -44,7 +53,7 @@ module.exports = (sequelize, DataTypes) => {
       slug: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: false,
         validate: {
           is: regexPatterns.slug,
         },
@@ -68,6 +77,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       as: 'attributeParent',
     });
+
+    ProductAttributeOption.belongsToMany(models.Product, { through: 'Product_ProductAttributeOption', as: 'products' });
   };
 
   return ProductAttributeOption;

@@ -1,7 +1,8 @@
 const httpStatus = require('http-status');
-const { Product, Category } = require('../models');
+const { Product, Category, sequelize, ProductAttributeOption, ProductAttribute } = require('../models');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
+const hasDuplicates = require('../utils/hasDuplicates');
 
 /**
  * Create a category. Noted that the category should have been validated by Joi.
@@ -16,23 +17,63 @@ const createProduct = async (productBody) => {
   // return Product.create(productBody);
 
   // Extract the categoryId from Body for pre-processing
-  const { categoryId, ...restOfBody } = productBody;
+  // Extract attributes key-value map as well
+  const { attributes, categoryId, ...restOfBody } = productBody;
 
-  // Build the new Product instance without categoryId
-  const product = Product.build(restOfBody);
+  const t = await sequelize.transaction();
+  let product;
+  try {
+    // code here!
+    // Create the new Product instance without categoryId
+    // Product must be created here for the ID to be generated
+    product = await Product.create(restOfBody);
 
-  // If categoryId object exists
-  if (categoryId) {
-    // Find the parent Category instance...
-    const parentCategory = await Category.findOne({ where: categoryId });
-    // And extracts its PRIMARY KEY...
-    const parentSqlId = parentCategory.get('id');
-    // Then sets it as the new Product categoryId.
-    product.set('categoryId', parentSqlId);
+    // If attributes key-value map exists
+    // attributeId: attributeOptionId
+    if (attributes) {
+      // Extract keys and values seperately to check for duplicates
+      const attributeKeys = Object.keys(attributes);
+      const attributeValues = Object.values(attributes);
+      if (hasDuplicates(attributeKeys)) {
+        throw new Error('Exists duplicate keys in the `attributes` map');
+      }
+      if (hasDuplicates(attributeValues)) {
+        throw new Error('Exists duplicate values in the `attributes` map');
+      }
+
+      const attributeEntries = Object.entries(attributes);
+      await Promise.all(
+        attributeEntries.map(async (entry) => {
+          const attributeOption = await ProductAttributeOption.findOne({ where: { id: entry[1], attributeId: entry[0] } });
+          if (!attributeOption) {
+            throw new Error(`Attribute key-value pair { ${entry[0]}: ${entry[1]} } does not exist.`);
+          }
+
+          await product.addAttributeOption(attributeOption);
+        })
+      );
+    }
+
+    // If categoryId object exists
+    if (categoryId) {
+      // Find the parent Category instance...
+      const parentCategory = await Category.findOne({ where: categoryId });
+      // And extracts its PRIMARY KEY...
+      const parentSqlId = parentCategory.get('id');
+      // Then sets it as the new Product categoryId.
+      product.set('categoryId', parentSqlId);
+    }
+
+    // Save and commit transaction to database
+    product.save();
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `${error}. Transaction rolled back`);
   }
 
-  // Save and commit to database
-  return product.save();
+  const productId = product.get('id');
+  return Product.findOne({ where: { id: productId }, include: [{ model: ProductAttributeOption, as: 'attributeOptions' }] });
 };
 
 /**
@@ -45,7 +86,7 @@ const createProduct = async (productBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryProducts = async (filter, options) => {
-  const users = await paginate(Product, filter, options);
+  const users = await paginate(Product, filter, options, [{ model: ProductAttributeOption, as: 'attributeOptions' }]);
   return users;
 };
 
@@ -55,7 +96,8 @@ const queryProducts = async (filter, options) => {
  * @returns {Promise<Product>}
  */
 const getProductById = async (id) => {
-  return Product.findByPk(id);
+  // return Product.findByPk(id);
+  return Product.findOne({ where: { id }, include: [{ model: ProductAttributeOption, as: 'attributeOptions' }] });
 };
 
 /**

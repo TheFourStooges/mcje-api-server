@@ -90,6 +90,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'optionGroups',
     });
 
+    Product.belongsToMany(models.ProductAttributeOption, {
+      through: 'Product_ProductAttributeOption',
+      as: 'attributeOptions',
+    });
+
     // Product.hasMany(ProductVariant);
     // ProductVariant.belongsTo(Product);
   };
