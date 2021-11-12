@@ -22,6 +22,7 @@ const connectDb = async () => {
     logger.info('Sequelize models synchronized');
     await sequelize.authenticate();
     logger.info('Connected to SQL Database via Sequelize ORM');
+
     // eslint-disable-next-line no-unused-expressions
     force &&
       (await User.create({
@@ -32,7 +33,7 @@ const connectDb = async () => {
       }));
     logger.info('Created administrator account --> admin:admin');
   } catch (error) {
-    throw Error('Error while establishing connection with SQL database');
+    throw Error(error);
   }
 };
 
