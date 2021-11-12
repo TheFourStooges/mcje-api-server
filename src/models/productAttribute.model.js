@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       slug: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: false,
+        unique: true,
         validate: {
           is: regexPatterns.slug,
         },
