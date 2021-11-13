@@ -87,7 +87,11 @@ const createProduct = async (productBody) => {
  */
 const queryProducts = async (filter, options) => {
   const users = await paginate(Product, filter, options, [
-    { model: ProductAttributeOption, as: 'attributeOptions', include: [{ model: ProductAttribute, as: 'attributeParent' }] },
+    {
+      model: ProductAttributeOption,
+      as: 'attributeOptions',
+      include: [{ model: ProductAttribute, as: 'attributeParent' }],
+    },
   ]);
   return users;
 };
