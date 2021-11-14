@@ -150,6 +150,20 @@ module.exports = (sequelize, DataTypes) => {
       },
     });
 
+    Product.belongsTo(models.ItemType, {
+      foreignKey: {
+        name: 'itemTypeId',
+        as: 'itemType',
+      },
+    });
+
+    Product.belongsTo(models.TargetAudience, {
+      foreignKey: {
+        name: 'targetAudienceId',
+        as: 'products',
+      },
+    });
+
     // Product.hasMany(models.ProductOptionGroup, {
     //   foreignKey: {
     //     name: 'productId',
