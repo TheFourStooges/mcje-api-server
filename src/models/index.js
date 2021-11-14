@@ -15,7 +15,7 @@ const db = {};
 
 const sequelize = new Sequelize(config.sequelize.database, config.sequelize.username, config.sequelize.password, {
   host: '192.168.1.200',
-  dialect: 'mysql',
+  dialect: 'postgres',
   logging: logger.debug.bind(logger),
 });
 
