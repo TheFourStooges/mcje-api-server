@@ -1,8 +1,11 @@
 const httpStatus = require('http-status');
-const { Product, Category, sequelize, ProductAttributeOption, ProductAttribute } = require('../models');
+// const logger = require('../config/logger');
+const { QueryTypes } = require('sequelize');
+const { Product, Category, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
-const hasDuplicates = require('../utils/hasDuplicates');
+const flattenObject = require('../utils/flattenObject');
+// const hasDuplicates = require('../utils/hasDuplicates');
 
 /**
  * Create a category. Noted that the category should have been validated by Joi.
@@ -18,7 +21,7 @@ const createProduct = async (productBody) => {
 
   // Extract the categoryId from Body for pre-processing
   // Extract attributes key-value map as well
-  const { attributes, categoryId, ...restOfBody } = productBody;
+  const { categoryId, ...restOfBody } = productBody;
 
   const t = await sequelize.transaction();
   let product;
@@ -27,32 +30,6 @@ const createProduct = async (productBody) => {
     // Create the new Product instance without categoryId
     // Product must be created here for the ID to be generated
     product = await Product.create(restOfBody);
-
-    // If attributes key-value map exists
-    // attributeId: attributeOptionId
-    if (attributes) {
-      // Extract keys and values seperately to check for duplicates
-      const attributeKeys = Object.keys(attributes);
-      const attributeValues = Object.values(attributes);
-      if (hasDuplicates(attributeKeys)) {
-        throw new Error('Exists duplicate keys in the `attributes` map');
-      }
-      if (hasDuplicates(attributeValues)) {
-        throw new Error('Exists duplicate values in the `attributes` map');
-      }
-
-      const attributeEntries = Object.entries(attributes);
-      await Promise.all(
-        attributeEntries.map(async (entry) => {
-          const attributeOption = await ProductAttributeOption.findOne({ where: { id: entry[1], attributeId: entry[0] } });
-          if (!attributeOption) {
-            throw new Error(`Attribute key-value pair { ${entry[0]}: ${entry[1]} } does not exist.`);
-          }
-
-          await product.addAttributeOption(attributeOption);
-        })
-      );
-    }
 
     // If categoryId object exists
     if (categoryId) {
@@ -72,8 +49,8 @@ const createProduct = async (productBody) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, `${error}. Transaction rolled back`);
   }
 
-  const productId = product.get('id');
-  return Product.findOne({ where: { id: productId }, include: [{ model: ProductAttributeOption, as: 'attributeOptions' }] });
+  // const productId = product.get('id');
+  return product;
 };
 
 /**
@@ -86,13 +63,7 @@ const createProduct = async (productBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryProducts = async (filter, options) => {
-  const users = await paginate(Product, filter, options, [
-    {
-      model: ProductAttributeOption,
-      as: 'attributeOptions',
-      include: [{ model: ProductAttribute, as: 'attributeParent' }],
-    },
-  ]);
+  const users = await paginate(Product, filter, options);
   return users;
 };
 
@@ -105,13 +76,6 @@ const getProductById = async (id) => {
   // return Product.findByPk(id);
   return Product.findOne({
     where: { id },
-    include: [
-      {
-        model: ProductAttributeOption,
-        as: 'attributeOptions',
-        include: [{ model: ProductAttribute, as: 'attributeParent' }],
-      },
-    ],
   });
 };
 
@@ -123,13 +87,6 @@ const getProductById = async (id) => {
 const getProductBySlug = async (slug) => {
   return Product.findOne({
     where: { slug },
-    include: [
-      {
-        model: ProductAttributeOption,
-        as: 'attributeOptions',
-        include: [{ model: ProductAttribute, as: 'attributeParent' }],
-      },
-    ],
   });
 };
 
@@ -158,40 +115,10 @@ const updateProductById = async (productId, updateBody) => {
   }
 
   // Extract the categoryId from Body for pre-processing
-  const { attributes, categoryId, ...restOfBody } = updateBody;
+  const { properties, categoryId, ...restOfBody } = updateBody;
 
   const t = await sequelize.transaction();
   try {
-    // If attributes key-value map exists
-    // attributeId: attributeOptionId
-    if (attributes) {
-      // Extract keys and values seperately to check for duplicates
-      const attributeKeys = Object.keys(attributes);
-      const attributeValues = Object.values(attributes);
-      if (hasDuplicates(attributeKeys)) {
-        throw new Error('Exists duplicate keys in the `attributes` map');
-      }
-      if (hasDuplicates(attributeValues)) {
-        throw new Error('Exists duplicate values in the `attributes` map');
-      }
-
-      // Removes old associations
-      const oldAttributes = await product.getAttributeOptions();
-      await product.removeAttributeOptions(oldAttributes);
-
-      const attributeEntries = Object.entries(attributes);
-      await Promise.all(
-        attributeEntries.map(async (entry) => {
-          const attributeOption = await ProductAttributeOption.findOne({ where: { id: entry[1], attributeId: entry[0] } });
-          if (!attributeOption) {
-            throw new Error(`Attribute key-value pair { ${entry[0]}: ${entry[1]} } does not exist.`);
-          }
-
-          await product.addAttributeOption(attributeOption);
-        })
-      );
-    }
-
     // If categoryId object exists
     if (categoryId) {
       // Find the parent Category instance...
@@ -199,11 +126,79 @@ const updateProductById = async (productId, updateBody) => {
       // And extracts its PRIMARY KEY...
       const parentSqlId = parentCategory.get('id');
       // Then sets it as the new Product categoryId.
-      product.set('categoryId', parentSqlId);
+      await product.update({ categoryId: parentSqlId });
+    }
+
+    // If properties object exists
+    // merge old object and new object. Default behavior replaces it
+    if (properties) {
+      // // Get existing `properties` object
+      // const existing = product.get('properties');
+      // console.log(JSON.stringify(existing, null, 4));
+      // Object.assign(existing.product, properties.product);
+      // Object.assign(existing.material, properties.material);
+      // console.log(JSON.stringify(existing, null, 4));
+      // product.set('properties', existing);
+
+      const flattenedProperties = flattenObject(properties);
+
+      Promise.all(
+        Object.entries(flattenedProperties).map(async ([key, value]) => {
+          const tokens = key.split('.');
+
+          // resulting string will be of format '"token",[...]"token",'
+          let pathInner = '';
+
+          // NO FOR EACH IN TRANSACTION!!!!!
+          // tokens.forEach((token) => pathInner.concat(`"${token},"`));
+          // eslint-disable-next-line no-restricted-syntax
+          for (const i in tokens) {
+            if (tokens[i]) {
+              pathInner += `"${tokens[i]}",`;
+            }
+          }
+
+          const path = `{${pathInner.substring(0, pathInner.length - 1)}}`;
+
+          // therefore we need to trim the last character ',' before passing into raw query
+          // https://stackoverflow.com/questions/24257726/could-not-determine-polymorphic-type-because-input-has-type-unknown
+          await sequelize.query(
+            'UPDATE "Products" SET properties = jsonb_set(properties, :path, to_jsonb(:value::text)) WHERE id = :productId',
+            {
+              replacements: {
+                path,
+                value: value.toString(),
+                productId,
+              },
+              type: QueryTypes.UPDATE,
+            }
+          );
+        })
+      );
+
+      // Object.entries(flattenedProperties).forEach(([key, value]) => {
+      //   console.log(key, value);
+      //   await product.update({ key: value });
+      // });
     }
 
     Object.assign(product, restOfBody);
+
     await product.save();
+
+    // =====
+    // await product.update(restOfBody);
+
+    // if (categoryId) {
+    //   // Find the parent Category instance...
+    //   const parentCategory = await Category.findOne({ where: categoryId });
+    //   // And extracts its PRIMARY KEY...
+    //   const parentSqlId = parentCategory.get('id');
+    //   // Then sets it as the new Product categoryId.
+    //   // product.set('categoryId', parentSqlId);
+    //   await product.update({ categoryId: parentSqlId });
+    // }
+
     await t.commit();
   } catch (error) {
     await t.rollback();
