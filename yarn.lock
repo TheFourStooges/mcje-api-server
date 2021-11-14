@@ -5858,6 +5858,11 @@
   "resolved" "https://registry.npmjs.org/reusify/-/reusify-1.0.4.tgz"
   "version" "1.0.4"
 
+"revalidator@^0.3.1":
+  "integrity" "sha1-/yzEz3zHxjhaxxAXgnbm280Ddi8="
+  "resolved" "https://registry.npmjs.org/revalidator/-/revalidator-0.3.1.tgz"
+  "version" "0.3.1"
+
 "rimraf@^2.6.1":
   "integrity" "sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w=="
   "resolved" "https://registry.npmjs.org/rimraf/-/rimraf-2.7.1.tgz"
