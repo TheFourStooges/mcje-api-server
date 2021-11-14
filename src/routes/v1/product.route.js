@@ -4,14 +4,14 @@ const validate = require('../../middlewares/validate');
 const productValidation = require('../../validations/product.validation');
 const productController = require('../../controllers/product.controller');
 
-const productOptionGroupValidation = require('../../validations/productOptionGroup.validation');
-const productOptionGroupController = require('../../controllers/productOptionGroup.controller');
+// const productOptionGroupValidation = require('../../validations/productOptionGroup.validation');
+// const productOptionGroupController = require('../../controllers/productOptionGroup.controller');
 
-const productAttributeValidation = require('../../validations/productAttribute.validation');
-const productAttributeController = require('../../controllers/productAttribute.controller');
+// const productAttributeValidation = require('../../validations/productAttribute.validation');
+// const productAttributeController = require('../../controllers/productAttribute.controller');
 
-const productAttributeOptionValidation = require('../../validations/productAttributeOption.validation');
-const productAttributeOptionController = require('../../controllers/productAttributeOption.controller');
+// const productAttributeOptionValidation = require('../../validations/productAttributeOption.validation');
+// const productAttributeOptionController = require('../../controllers/productAttributeOption.controller');
 
 const router = express.Router();
 

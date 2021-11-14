@@ -5,6 +5,6 @@ module.exports.userService = require('./user.service');
 
 module.exports.categoryService = require('./category.service');
 module.exports.productService = require('./product.service');
-module.exports.productOptionGroupService = require('./productOptionGroup.service');
-module.exports.productAttributeService = require('./productAttribute.service');
-module.exports.productAttributeOptionService = require('./productAttributeOption.service');
+// module.exports.productOptionGroupService = require('./productOptionGroup.service');
+// module.exports.productAttributeService = require('./productAttribute.service');
+// module.exports.productAttributeOptionService = require('./productAttributeOption.service');
