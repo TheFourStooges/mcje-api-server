@@ -32,14 +32,29 @@ const paginate = (schema) => {
       sort = 'createdAt';
     }
 
+    // Check the supplied `options` parameters: limit and page.
+    // limit: default = 10
+    // page: default = 1
+    // Note: parseInt(number, radix): radix == number base
     const limit = options.limit && parseInt(options.limit, 10) > 0 ? parseInt(options.limit, 10) : 10;
     const page = options.page && parseInt(options.page, 10) > 0 ? parseInt(options.page, 10) : 1;
     const skip = (page - 1) * limit;
 
+    // this.countDocuments(filter).exec() returns the count of document that satisfy the filter
     const countPromise = this.countDocuments(filter).exec();
+    // See: https://stackoverflow.com/questions/5539955/how-to-paginate-with-mongoose-in-node-js
+    // find() using filter. See https://mongoosejs.com/docs/tutorials/query_casting.html
+    // sort(): Sets the sort order. If string, must be space delimited list of path name, '-' prefix = desc
+    // skip(): Specifies the number of documents to skip. https://mongoosejs.com/docs/api/query.html#query_Query-skip
+    // limit(): Specifies the max number of documents the query will return. https://mongoosejs.com/docs/api/query.html#query_Query-limit
     let docsPromise = this.find(filter).sort(sort).skip(skip).limit(limit);
 
+    // Mongoose populate() lets you reference documents in other collections
+    // Population is the process of automatically replacing the specified paths in the document with document(s)
+    // from other collection(s).
     if (options.populate) {
+      // Each path is delimited with ','
+      // format: path_a.populate_a,path_b.populate_b,...
       options.populate.split(',').forEach((populateOption) => {
         docsPromise = docsPromise.populate(
           populateOption
@@ -52,6 +67,7 @@ const paginate = (schema) => {
 
     docsPromise = docsPromise.exec();
 
+    // See: https://dmitripavlutin.com/promise-all/
     return Promise.all([countPromise, docsPromise]).then((values) => {
       const [totalResults, results] = values;
       const totalPages = Math.ceil(totalResults / limit);

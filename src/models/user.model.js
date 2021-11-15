@@ -1,91 +1,141 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+// const validator = require('validator');
 const bcrypt = require('bcryptjs');
-const { toJSON, paginate } = require('./plugins');
+const { Model, Op } = require('sequelize');
+// const sequelize = require('../config/sequelize');
+// const { sequelizeToJSON, sequelizePaginate } = require('./plugins');
 const { roles } = require('../config/roles');
 
-const userSchema = mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      lowercase: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error('Invalid email');
-        }
+module.exports = (sequelize, DataTypes) => {
+  /**
+   * @typedef User
+   */
+  class User extends Model {
+    static async isEmailTaken(email, excludeUserId) {
+      let user;
+      if (excludeUserId) {
+        user = await this.findOne({
+          where: {
+            email,
+            [Op.not]: [{ id: excludeUserId }],
+          },
+        });
+      } else {
+        user = await this.findOne({
+          where: {
+            email,
+          },
+        });
+      }
+
+      // https://stackoverflow.com/questions/784929/what-is-the-not-not-operator-in-javascript
+      return !!user;
+    }
+
+    /**
+     * Used in login service, checks password match
+     * @param {string} password unhashed password from request
+     * @returns true or false whether the password matches the hashed password in DB
+     */
+    async isPasswordMatch(password) {
+      // console.log(this.getDataValue('password'));
+      // console.log(this.scope('withPassword').getDataValue('password'));
+      // console.log(password, this.get('password'));
+      return bcrypt.compare(password, this.get('password'));
+    }
+
+    // @override
+    /**
+     * Override of default toJSON(), does not include the password field
+     * @returns {Object} with password removed
+     */
+    toJSON() {
+      const values = { ...this.get() };
+
+      delete values.password;
+      return values;
+    }
+  }
+
+  User.init(
+    {
+      id: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        unique: true,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
+      },
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        set(value) {
+          // Trim string prior to SQL INSERT
+          this.setDataValue('name', String.prototype.trim.call(value));
+        },
+      },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+          isEmail: true,
+        },
+        set(value) {
+          // Trim string and transform to lowercase
+          this.setDataValue('email', String.prototype.toLowerCase.call(value));
+        },
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          len: [8, 128],
+          isValidPassword(value) {
+            if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
+              throw new Error('Password must contain at least one letter and one number');
+            }
+          },
+        },
+      },
+      role: {
+        type: DataTypes.ENUM,
+        values: roles,
+        defaultValue: 'user',
+      },
+      isEmailVerified: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
       },
     },
-    password: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 8,
-      validate(value) {
-        if (!value.match(/\d/) || !value.match(/[a-zA-Z]/)) {
-          throw new Error('Password must contain at least one letter and one number');
-        }
-      },
-      private: true, // used by the toJSON plugin
-    },
-    role: {
-      type: String,
-      enum: roles,
-      default: 'user',
-    },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+    {
+      // Other options
+      sequelize,
+      // ! BUG ! Find solution ! can't get password from instance level method (isPasswordMatch())
+      // defaultScope: {
+      //   attributes: { exclude: ['password'] },
+      // },
+      // scopes: {
+      //   withPassword: {
+      //     attributes: {},
+      //   },
+      // },
+      timestamps: true,
+      paranoid: true,
+    }
+  );
 
-// add plugin that converts mongoose to json
-userSchema.plugin(toJSON);
-userSchema.plugin(paginate);
+  User.beforeSave(async (user) => {
+    if (user.changed('password')) {
+      const hashedPassword = await bcrypt.hash(user.password, 8);
+      user.setDataValue('password', hashedPassword);
+    }
+  });
 
-/**
- * Check if email is taken
- * @param {string} email - The user's email
- * @param {ObjectId} [excludeUserId] - The id of the user to be excluded
- * @returns {Promise<boolean>}
- */
-userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
-  const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
-  return !!user;
+  User.associate = (models) => {
+    User.hasMany(models.Token, {
+      foreignKey: 'user',
+    });
+  };
+
+  return User;
 };
-
-/**
- * Check if password matches the user's password
- * @param {string} password
- * @returns {Promise<boolean>}
- */
-userSchema.methods.isPasswordMatch = async function (password) {
-  const user = this;
-  return bcrypt.compare(password, user.password);
-};
-
-userSchema.pre('save', async function (next) {
-  const user = this;
-  if (user.isModified('password')) {
-    user.password = await bcrypt.hash(user.password, 8);
-  }
-  next();
-});
-
-/**
- * @typedef User
- */
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
