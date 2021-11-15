@@ -147,6 +147,7 @@ module.exports = (sequelize, DataTypes) => {
     Product.belongsTo(models.Category, {
       foreignKey: {
         name: 'categoryId',
+        as: 'category',
       },
     });
 
@@ -160,7 +161,7 @@ module.exports = (sequelize, DataTypes) => {
     Product.belongsTo(models.TargetAudience, {
       foreignKey: {
         name: 'targetAudienceId',
-        as: 'products',
+        as: 'targetAudience',
       },
     });
 
