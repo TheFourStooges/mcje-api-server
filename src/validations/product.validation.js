@@ -80,7 +80,127 @@ const getProducts = {
     page: Joi.number().integer(),
   }),
   body: Joi.object().keys({
-    attributeOptions: Joi.array().items(idUnionSchema),
+    name: Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string()),
+    slug: Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string()),
+    description: Joi.alternatives().try(Joi.array().items(Joi.string()), Joi.string()),
+    isActive: Joi.boolean(),
+    categoryId: Joi.array().items(idUnionSchema).unique('id').unique('slug'),
+    basePrice: Joi.alternatives().try(
+      Joi.object().keys({
+        from: Joi.object().keys({
+          value: Joi.number().precision(2).positive().required(),
+          inclusive: Joi.boolean().required(),
+        }),
+        to: Joi.object().keys({
+          value: Joi.number().precision(2).positive().required(),
+          inclusive: Joi.boolean().required(),
+        }),
+      }),
+      Joi.number().precision(2).positive()
+    ),
+    // https://stackoverflow.com/questions/54483904/how-to-use-joi-to-validate-map-object-map-keys-and-map-values
+    // attributes: Joi.object().pattern(Joi.string().regex(regexPatterns.uuidv4), Joi.string().regex(regexPatterns.uuidv4)),
+    // optionGroups: Joi.array().items(optionGroupSchema),
+    properties: Joi.object().keys({
+      product: Joi.object().keys({
+        productType: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.productType)),
+          Joi.string().valid(...attributesEnum.productType)
+        ),
+        claspType: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.claspType)),
+          Joi.string().valid(...attributesEnum.claspType)
+        ),
+        chainType: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.chainType)),
+          Joi.string().valid(...attributesEnum.chainType)
+        ),
+        backFinding: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.backFinding)),
+          Joi.string().valid(...attributesEnum.backFinding)
+        ),
+        ringSize: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.ringSize)),
+          Joi.string().valid(...attributesEnum.ringSize)
+        ),
+      }),
+      material: Joi.object().keys({
+        // Keys
+        materialType: Joi.array()
+          .items(Joi.string().valid(...attributesEnum.materialType))
+          .unique(),
+        // material may be automatically generated? no need to send
+        gemType: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.gemType)),
+          Joi.string().valid(...attributesEnum.gemType)
+        ),
+        stoneCut: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.stoneCut)),
+          Joi.string().valid(...attributesEnum.stoneCut)
+        ),
+        stoneColor: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.stoneColor)),
+          Joi.string().valid(...attributesEnum.stoneColor)
+        ),
+        stoneClarity: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.stoneClarity)),
+          Joi.string().valid(...attributesEnum.stoneClarity)
+        ),
+        stoneShape: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.stoneShape)),
+          Joi.string().valid(...attributesEnum.stoneShape)
+        ),
+        pearlType: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.pearlType)),
+          Joi.string().valid(...attributesEnum.pearlType)
+        ),
+        pearlColor: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.pearlColor)),
+          Joi.string().valid(...attributesEnum.pearlColor)
+        ),
+        pearlLuster: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.pearlLuster)),
+          Joi.string().valid(...attributesEnum.pearlLuster)
+        ),
+        pearlShape: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.pearlShape)),
+          Joi.string().valid(...attributesEnum.pearlShape)
+        ),
+        pearlUniformity: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.pearlUniformity)),
+          Joi.string().valid(...attributesEnum.pearlUniformity)
+        ),
+        surfaceMarking: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.surfaceMarking)),
+          Joi.string().valid(...attributesEnum.surfaceMarking)
+        ),
+        stringingMethod: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.stringingMethod)),
+          Joi.string().valid(...attributesEnum.stringingMethod)
+        ),
+        sizePerPearl: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.sizePerPearl)),
+          Joi.string().valid(...attributesEnum.sizePerPearl)
+        ),
+        settingType: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.settingType)),
+          Joi.string().valid(...attributesEnum.settingType)
+        ),
+        metalType: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.metalType)),
+          Joi.string().valid(...attributesEnum.metalType)
+        ),
+        metalStamp: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.metalStamp)),
+          Joi.string().valid(...attributesEnum.metalStamp)
+        ),
+        inscription: Joi.alternatives().try(
+          Joi.array().items(Joi.string().valid(...attributesEnum.inscription)),
+          Joi.string().valid(...attributesEnum.inscription)
+        ),
+      }),
+    }),
+    assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
   }),
 };
 
