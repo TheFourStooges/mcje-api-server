@@ -1,11 +1,11 @@
 const { Op } = require('sequelize');
-const flatten, { unflatten } = require('flat');
+// const flatten, { unflatten } = require('flat');
 
-const mapProductsReqToSqlWhere = (requestBody) => {
-  const flattenedBody = flatten(requestBody, { safe: true });
+// const mapProductsReqToSqlWhere = (requestBody) => {
+//   const flattenedBody = flatten(requestBody, { safe: true });
 
   
-}
+// }
 
 // const mapProductsRequestToSqlWhere = (requestBody) => {
 //   const { name, description, properties, basePrice, assets, ...restOfBody } = requestBody;
@@ -67,4 +67,4 @@ const mapProductsReqToSqlWhere = (requestBody) => {
 //   };
 // };
 
-module.exports = mapProductsRequestToSqlWhere;
+// module.exports = mapProductsRequestToSqlWhere;
