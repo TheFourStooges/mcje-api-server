@@ -8,3 +8,5 @@ module.exports.productService = require('./product.service');
 // module.exports.productOptionGroupService = require('./productOptionGroup.service');
 // module.exports.productAttributeService = require('./productAttribute.service');
 // module.exports.productAttributeOptionService = require('./productAttributeOption.service');
+
+module.exports.cartService = require('./cart.service');

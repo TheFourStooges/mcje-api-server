@@ -11,14 +11,14 @@ const createProduct = catchAsync(async (req, res) => {
 });
 
 const getProducts = catchAsync(async (req, res) => {
-  // const filter = pick(req.query, ['name', 'categoryId', 'slug']);
+  const filter = pick(req.query, ['name', 'categoryId', 'slug']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const bodyFilter = pick(req.body, ['name', 'categoryId', 'slug', 'properties']);
+  // const bodyFilter = pick(req.body, ['name', 'categoryId', 'slug', 'properties']);
 
-  console.log('----> bodyFilter ', JSON.stringify(bodyFilter, null, 4));
-  console.log('----> after map', JSON.stringify(mapProductsRequestToSqlWhere(bodyFilter), null, 4));
+  // console.log('----> bodyFilter ', JSON.stringify(bodyFilter, null, 4));
+  // console.log('----> after map', JSON.stringify(mapProductsRequestToSqlWhere(bodyFilter), null, 4));
 
-  const result = await productService.queryProducts(bodyFilter, options);
+  const result = await productService.queryProducts(filter, options);
   res.send(result);
 });
 
