@@ -34,6 +34,16 @@ const addItemToCart = {
   }),
 };
 
+const updateItemInCart = {
+  params: Joi.object().keys({
+    cartId: Joi.string().custom(objectId),
+    lineItemId: Joi.string().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    quantity: Joi.number().integer().min(0),
+  }),
+};
+
 const updateCategory = {
   params: Joi.object().keys({
     categoryId: Joi.required().custom(objectId),
@@ -64,4 +74,5 @@ module.exports = {
   deleteCategory,
 
   addItemToCart,
+  updateItemInCart,
 };

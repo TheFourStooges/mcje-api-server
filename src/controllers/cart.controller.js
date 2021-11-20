@@ -43,6 +43,14 @@ const addItemToCart = catchAsync(async (req, res) => {
   res.send(cart);
 });
 
+const updateItemInCart = catchAsync(async (req, res) => {
+  const lineItem = await cartService.updateItemInCart(req.params.cartId, req.user.id, req.params.lineItemId, req.body);
+  if (!lineItem) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Cart or line item combination not found');
+  }
+  res.send(lineItem);
+});
+
 module.exports = {
   createCart,
   // getCategories,
@@ -50,4 +58,5 @@ module.exports = {
   // updateCategory,
   // deleteCategory,
   addItemToCart,
+  updateItemInCart,
 };
