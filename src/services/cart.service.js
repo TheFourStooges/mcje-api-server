@@ -43,6 +43,48 @@ const getCartById = async (cartId, userId) => {
   });
 };
 
+const deleteCartById = async (cartId, userId) => {
+  const cart = await getCartById(cartId, userId);
+  if (!cart) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Cart not found');
+  }
+
+  // const cartItems = await cart.getCartItems();
+  const t = await sequelize.transaction();
+  try {
+    await CartItem.destroy({ where: { cartId }, transaction: t });
+    await cart.destroy({ transaction: t });
+
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+
+  return cart;
+};
+
+const emptyCartById = async (cartId, userId) => {
+  const cart = await getCartById(cartId, userId);
+  if (!cart) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Cart not found');
+  }
+
+  const t = await sequelize.transaction();
+  try {
+    await cart.update({ totalItems: 0, totalUniqueItems: 0, subtotal: 0 }, { transaction: t });
+
+    await CartItem.destroy({ where: { cartId }, transaction: t });
+
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+
+  return cart.reload();
+};
+
 const getCartItemById = async (cartId, userId, lineItemId) => {
   const cart = await getCartById(cartId, userId);
 
@@ -54,7 +96,7 @@ const getCartItemById = async (cartId, userId, lineItemId) => {
     ],
   });
 
-  return cart && cartItem ? cartItem : null;
+  return cart && cartItem ? { cart, cartItem } : null;
 };
 
 const addItemToCart = async (cartId, userId, requestBody) => {
@@ -173,7 +215,7 @@ const addItemToCart = async (cartId, userId, requestBody) => {
 };
 
 const updateItemInCart = async (cartId, userId, lineItemId, requestBody) => {
-  const cartItem = await getCartItemById(cartId, userId, lineItemId);
+  const { cart, cartItem } = await getCartItemById(cartId, userId, lineItemId);
   if (!cartItem) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Cart and item combination not found');
   }
@@ -235,10 +277,40 @@ const updateItemInCart = async (cartId, userId, lineItemId, requestBody) => {
   return cartItem.reload();
 };
 
+const deleteItemInCart = async (cartId, userId, lineItemId) => {
+  const { cart, cartItem } = await getCartItemById(cartId, userId, lineItemId);
+
+  if (!cartItem) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Cart Item not found');
+  }
+
+  const removeItemsCount = cartItem.get('quantity');
+  const removeLineTotal = cartItem.get('lineTotal');
+
+  const t = await sequelize.transaction();
+  try {
+    await cartItem.destroy({ transaction: t });
+    await cart.decrement({
+      totalItems: removeItemsCount,
+      totalUniqueItems: 1,
+      subtotal: removeLineTotal,
+    });
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+
+  return cart.reload();
+};
+
 module.exports = {
   createCart,
   getCartById,
+  deleteCartById,
+  emptyCartById,
   addItemToCart,
   getCartItemById,
   updateItemInCart,
+  deleteItemInCart,
 };

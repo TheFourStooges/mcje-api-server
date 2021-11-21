@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
-const { Category } = require('../models');
+const { productService } = require('.');
+const { Category, Product } = require('../models');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
 
@@ -56,7 +57,9 @@ const queryCategories = async (filter, options) => {
  * @returns {Promise<Category>}
  */
 const getCategoryById = async (id) => {
-  return Category.findByPk(id);
+  // return Category.findByPk(id);
+  // , include: [{ model: Product, as: 'products' }]
+  return Category.findOne({ where: { id } });
 };
 
 /**

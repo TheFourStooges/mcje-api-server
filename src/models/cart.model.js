@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
 
       // See: https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-query
       const [results, metadata] = await sequelize.query(
-        'SELECT COUNT(*) FROM (SELECT DISTINCT "productId" FROM "CartItems" WHERE "cartId" = :id) AS distinct_products',
+        'SELECT COUNT(*) FROM (SELECT DISTINCT "productId" FROM "CartItems" WHERE "cartId" = :id AND "deletedAt" IS NULL) AS distinct_products',
         {
           replacements: { id: cartId },
           type: QueryTypes.SELECT,
@@ -92,7 +92,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     Cart.hasMany(models.CartItem, {
-      foreignKey: { name: 'cartId' },
+      foreignKey: { name: 'cartId', allowNull: false },
       as: 'cartItems',
     });
   };

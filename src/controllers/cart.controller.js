@@ -30,10 +30,15 @@ const getCart = catchAsync(async (req, res) => {
 //   res.send(category);
 // });
 
-// const deleteCategory = catchAsync(async (req, res) => {
-//   await cartService.deleteCategoryById(req.params.categoryId);
-//   res.status(httpStatus.NO_CONTENT).send();
-// });
+const deleteCart = catchAsync(async (req, res) => {
+  await cartService.deleteCartById(req.params.cartId, req.user.id);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const emptyCart = catchAsync(async (req, res) => {
+  const cart = await cartService.emptyCartById(req.params.cartId, req.user.id);
+  res.send(cart);
+});
 
 const addItemToCart = catchAsync(async (req, res) => {
   const cart = await cartService.addItemToCart(req.params.cartId, req.user.id, req.body);
@@ -51,12 +56,22 @@ const updateItemInCart = catchAsync(async (req, res) => {
   res.send(lineItem);
 });
 
+const deleteItemInCart = catchAsync(async (req, res) => {
+  const cart = await cartService.deleteItemInCart(req.params.cartId, req.user.id, req.params.lineItemId);
+  if (!cart) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Cart or line item combination not found');
+  }
+  res.send(cart);
+});
+
 module.exports = {
   createCart,
   // getCategories,
   getCart,
   // updateCategory,
-  // deleteCategory,
+  deleteCart,
+  emptyCart,
   addItemToCart,
   updateItemInCart,
+  deleteItemInCart,
 };
