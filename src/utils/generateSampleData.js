@@ -1,7 +1,28 @@
 /* eslint-disable no-unused-vars */
-const { Product, Category, User, Cart } = require('../models');
-const { categoryService } = require('../services');
+const slugify = require('slugify');
 const faker = require('faker');
+const attributesEnum = require('../config/attributesEnum');
+const { Product, Category, User, Cart, sequelize } = require('../models');
+const { categoryService, productService } = require('../services');
+
+const generateUsers = async () => {
+  const users = [
+    {
+      email: 'admin@example.com',
+      password: 'password1',
+      name: 'admin',
+      role: 'admin',
+    },
+    {
+      email: 'user@example.com',
+      password: 'password1',
+      name: 'user',
+      role: 'user',
+    },
+  ];
+
+  Promise.all(users.map((user) => User.create(user)));
+};
 
 const generateCategories = async () => {
   const jewelry = await categoryService.createCategory({
@@ -87,6 +108,105 @@ const generateCategories = async () => {
   });
 };
 
-const generateSampleData = () => {};
+const generateProducts = async () => {
+  // const categoryIds = [
+  //   'jewelry',
+  //   'necklaces-pendants',
+  //   'bracelets',
+  //   'earrings',
+  //   'rings',
+  //   'brooches',
+  //   'charms',
+  //   'engagement',
+  //   'mens-engagement-rings',
+  //   'womens-engagement-rings',
+  //   'mens-wedding-bands',
+  //   'womens-wedding-bands',
+  // ];
+
+  const categories = await Category.findAll({ attributes: ['id'] });
+  const categoryIds = categories.map((instance) => instance.dataValues.id);
+  console.log(JSON.stringify(categoryIds, null, 4));
+
+  const generateFromCategory = (categoryId, count) => {
+    const productsData = [];
+    for (let i = 0; i < count; i += 1) {
+      const name = faker.commerce.productName();
+      const slug = `${slugify(name.toLowerCase())}-${Math.floor(Math.random() * 10000)}`;
+      const productType = attributesEnum.productType[Math.floor(Math.random() * attributesEnum.productType.length)];
+      const claspType = attributesEnum.claspType[Math.floor(Math.random() * attributesEnum.claspType.length)];
+      const chainType = attributesEnum.chainType[Math.floor(Math.random() * attributesEnum.chainType.length)];
+      const backFinding = attributesEnum.backFinding[Math.floor(Math.random() * attributesEnum.backFinding.length)];
+      const ringSize = attributesEnum.ringSize[Math.floor(Math.random() * attributesEnum.ringSize.length)];
+      const gemType = attributesEnum.gemType[Math.floor(Math.random() * attributesEnum.gemType.length)];
+      const stoneCut = attributesEnum.stoneCut[Math.floor(Math.random() * attributesEnum.stoneCut.length)];
+      const stoneColor = attributesEnum.stoneColor[Math.floor(Math.random() * attributesEnum.stoneColor.length)];
+      const stoneClarity = attributesEnum.stoneClarity[Math.floor(Math.random() * attributesEnum.stoneClarity.length)];
+      const stoneShape = attributesEnum.stoneShape[Math.floor(Math.random() * attributesEnum.stoneShape.length)];
+      const pearlType = attributesEnum.pearlType[Math.floor(Math.random() * attributesEnum.pearlType.length)];
+      const pearlColor = attributesEnum.pearlColor[Math.floor(Math.random() * attributesEnum.pearlColor.length)];
+      const pearlLuster = attributesEnum.pearlLuster[Math.floor(Math.random() * attributesEnum.pearlLuster.length)];
+      const pearlShape = attributesEnum.pearlShape[Math.floor(Math.random() * attributesEnum.pearlShape.length)];
+      const pearlUniformity =
+        attributesEnum.pearlUniformity[Math.floor(Math.random() * attributesEnum.pearlUniformity.length)];
+      const surfaceMarking = attributesEnum.surfaceMarking[Math.floor(Math.random() * attributesEnum.surfaceMarking.length)];
+      const stringingMethod =
+        attributesEnum.stringingMethod[Math.floor(Math.random() * attributesEnum.stringingMethod.length)];
+      const sizePerPearl = attributesEnum.sizePerPearl[Math.floor(Math.random() * attributesEnum.sizePerPearl.length)];
+      const settingType = attributesEnum.settingType[Math.floor(Math.random() * attributesEnum.settingType.length)];
+      const metalType = attributesEnum.metalType[Math.floor(Math.random() * attributesEnum.metalType.length)];
+      const metalStamp = attributesEnum.metalStamp[Math.floor(Math.random() * attributesEnum.metalStamp.length)];
+      const inscription = attributesEnum.inscription[Math.floor(Math.random() * attributesEnum.inscription.length)];
+      productsData.push({
+        name,
+        slug,
+        description: faker.commerce.productDescription(),
+        basePrice: faker.commerce.price(),
+        categoryId,
+        properties: {
+          product: { productType, claspType, chainType, backFinding, ringSize },
+          material: {
+            materialType: ['metal', 'gemstone', 'pearl'],
+            gemType,
+            stoneCut,
+            stoneColor,
+            stoneClarity,
+            stoneShape,
+            pearlType,
+            pearlColor,
+            pearlLuster,
+            pearlShape,
+            pearlUniformity,
+            surfaceMarking,
+            stringingMethod,
+            sizePerPearl,
+            settingType,
+            metalType,
+            metalStamp,
+            inscription,
+          },
+        },
+      });
+    }
+
+    return productsData;
+  };
+
+  const products = categoryIds.reduce((accumulated, currentCategory) => {
+    return [...accumulated, ...generateFromCategory(currentCategory, 10)];
+  }, []);
+
+  console.log(products);
+
+  Product.bulkCreate(products, { validate: true, benchmark: true });
+
+  // Promise.all(products.map((product) => productService.createProduct(product)));
+};
+
+const generateSampleData = async () => {
+  await generateUsers();
+  await generateCategories();
+  await generateProducts();
+};
 
 module.exports = generateSampleData;
