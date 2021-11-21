@@ -152,8 +152,8 @@ module.exports = (sequelize, DataTypes) => {
     Product.belongsTo(models.Category, {
       foreignKey: {
         name: 'categoryId',
-        as: 'category',
       },
+      as: 'category',
     });
 
     Product.belongsToMany(models.Tag, {
