@@ -156,19 +156,30 @@ module.exports = (sequelize, DataTypes) => {
       },
     });
 
-    Product.belongsTo(models.ItemType, {
+    Product.belongsToMany(models.Tag, {
+      through: 'Tags_Products',
       foreignKey: {
-        name: 'itemTypeId',
-        as: 'itemType',
+        name: 'productId',
       },
+      otherKey: {
+        name: 'tagId',
+      },
+      as: 'tags',
     });
 
-    Product.belongsTo(models.TargetAudience, {
-      foreignKey: {
-        name: 'targetAudienceId',
-        as: 'targetAudience',
-      },
-    });
+    // Product.belongsTo(models.ItemType, {
+    //   foreignKey: {
+    //     name: 'itemTypeId',
+    //     as: 'itemType',
+    //   },
+    // });
+
+    // Product.belongsTo(models.TargetAudience, {
+    //   foreignKey: {
+    //     name: 'targetAudienceId',
+    //     as: 'targetAudience',
+    //   },
+    // });
 
     // Product.hasMany(models.ProductOptionGroup, {
     //   foreignKey: {
