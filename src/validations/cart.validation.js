@@ -7,16 +7,16 @@ const createCart = {
   body: Joi.object().keys({}),
 };
 
-const getCategories = {
-  query: Joi.object().keys({
-    name: Joi.string(),
-    slug: Joi.string().regex(regexPatterns.slug),
-    webId: Joi.string().regex(regexPatterns.uuidv4),
-    limit: Joi.number().integer(),
-    page: Joi.number().integer(),
-    parentId: Joi.string().custom(objectId),
-  }),
-};
+// const getCategories = {
+//   query: Joi.object().keys({
+//     name: Joi.string(),
+//     slug: Joi.string().regex(regexPatterns.slug),
+//     webId: Joi.string().regex(regexPatterns.uuidv4),
+//     limit: Joi.number().integer(),
+//     page: Joi.number().integer(),
+//     parentId: Joi.string().custom(objectId),
+//   }),
+// };
 
 const getCart = {
   params: Joi.object().keys({
@@ -51,21 +51,21 @@ const deleteItemInCart = {
   }),
 };
 
-const updateCategory = {
-  params: Joi.object().keys({
-    categoryId: Joi.required().custom(objectId),
-  }),
-  body: Joi.object()
-    .keys({
-      name: Joi.string(),
-      slug: Joi.string(),
-      description: Joi.string(),
-      isActive: Joi.boolean(),
-      assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
-      parentId: idUnionSchema,
-    })
-    .min(1),
-};
+// const updateCategory = {
+//   params: Joi.object().keys({
+//     categoryId: Joi.required().custom(objectId),
+//   }),
+//   body: Joi.object()
+//     .keys({
+//       name: Joi.string(),
+//       slug: Joi.string(),
+//       description: Joi.string(),
+//       isActive: Joi.boolean(),
+//       assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
+//       parentId: idUnionSchema,
+//     })
+//     .min(1),
+// };
 
 const deleteCart = {
   params: Joi.object().keys({
@@ -81,9 +81,9 @@ const emptyCart = {
 
 module.exports = {
   createCart,
-  getCategories,
+  // getCategories,
   getCart,
-  updateCategory,
+  // updateCategory,
   deleteCart,
   emptyCart,
   addItemToCart,
