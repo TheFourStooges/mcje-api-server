@@ -15,6 +15,7 @@ const envVarsSchema = Joi.object()
     SQL_USERNAME: Joi.string().required().description('Sequelize: database login username'),
     SQL_PASSWORD: Joi.string().required().description('Sequelize: database login password'),
     CART_EXPIRATION_DAYS: Joi.number().default(30).description('days after which carts expire'),
+    CHECKOUT_EXPIRATION_DAYS: Joi.number().default(7).description('days after which checkout tokens expire'),
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
     JWT_ACCESS_EXPIRATION_MINUTES: Joi.number().default(30).description('minutes after which access tokens expire'),
     JWT_REFRESH_EXPIRATION_DAYS: Joi.number().default(30).description('days after which refresh tokens expire'),
@@ -50,6 +51,9 @@ module.exports = {
   },
   cart: {
     expirationDays: envVars.CART_EXPIRATION_DAYS,
+  },
+  checkout: {
+    expirationDays: envVars.CHECKOUT_EXPIRATION_DAYS,
   },
   mongoose: {
     url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
