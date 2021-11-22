@@ -42,6 +42,34 @@ module.exports = (sequelize, DataTypes) => {
 
       return subtotal;
     }
+
+    async getStatistics() {
+      const lineItems = await this.getCartItems();
+      const cartId = this.get('id');
+
+      const totalItems = lineItems
+        .map((lineItem) => Number.parseInt(lineItem.get('quantity'), 10))
+        .reduce((accumulated, currentValue) => accumulated + currentValue, 0);
+
+      const [results, metadata] = await sequelize.query(
+        'SELECT COUNT(*) FROM (SELECT DISTINCT "productId" FROM "CartItems" WHERE "cartId" = :id AND "deletedAt" IS NULL) AS distinct_products',
+        {
+          replacements: { id: cartId },
+          type: QueryTypes.SELECT,
+        }
+      );
+      const totalUniqueItems = Number.parseInt(results.count, 10);
+
+      const subtotal = lineItems
+        .map((lineItem) => Number.parseFloat(lineItem.get('lineTotal')))
+        .reduce((accumulated, currentValue) => accumulated + currentValue, 0);
+
+      return {
+        totalItems,
+        totalUniqueItems,
+        subtotal,
+      };
+    }
   }
 
   Cart.init(
@@ -72,6 +100,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
+      },
+      status: {
+        type: DataTypes.ENUM,
+        values: ['active', 'checkout', 'captured'],
+        allowNull: false,
+        defaultValue: 'active',
       },
       expiresAt: {
         type: DataTypes.DATE,
