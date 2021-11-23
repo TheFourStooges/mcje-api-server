@@ -131,7 +131,55 @@ const updateCheckoutTokenById = async (userId, checkoutTokenId, updateBody) => {
   return checkoutToken.reload();
 };
 
-const captureOrder = async (userId, checkoutTokenId) => {};
+const captureOrder = async (userId, checkoutTokenId, orderPayload) => {
+  // Find and refresh status of checkout token
+  const checkoutToken = await updateCheckoutTokenById(userId, checkoutTokenId, {});
+  if (!checkoutToken) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Checkout Token not found');
+  }
+
+  const cart = await checkoutToken.getCart();
+  const cartStatistics = await cart.getStatistics();
+  const { totalItems, totalUniqueItems, subtotal } = cartStatistics;
+
+  const shippingMethod = await checkoutToken.getShippingMethod();
+  if (!shippingMethod) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Checkout Token must have shippingMethodId defined before conversion to order'
+    );
+  }
+  const shippingCost = Number.parseFloat(shippingMethod.get('price'));
+
+  const tax = Number.parseFloat(checkoutToken.get('tax'));
+
+  const total = subtotal + shippingCost;
+  const totalWithTax = total + tax;
+
+  // Get CartItems
+  const cartItems = await cart.getCartItems();
+  // Remove attributes and map to new array for order creation
+  const orderItems = cartItems.map((cartItem) => {
+    const { id, cartId, isActive, createdAt, updatedAt, ...orderItem } = cartItem;
+
+    return orderItem;
+  });
+
+  const referenceNumber = "";
+
+  let order;
+  const t = await sequelize.transaction();
+  try {
+    order = await Order.create({
+      referenceNumber: 
+    })
+
+    await t.commit();
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
+};
 
 module.exports = {
   generateCheckoutToken,

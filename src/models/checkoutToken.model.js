@@ -1,7 +1,6 @@
-const { object } = require('joi');
-const { Model, Op, QueryTypes } = require('sequelize');
-const regexPatterns = require('../config/regexPatterns');
-const jsonbValidator = require('../utils/jsonbValidator');
+const { Model } = require('sequelize');
+// const regexPatterns = require('../config/regexPatterns');
+// const jsonbValidator = require('../utils/jsonbValidator');
 
 module.exports = (sequelize, DataTypes) => {
   /**
@@ -20,7 +19,12 @@ module.exports = (sequelize, DataTypes) => {
       },
       expiresAt: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
+      },
+      status: {
+        type: DataTypes.ENUM,
+        values: ['created', 'captured'],
+        defaultValue: 'created',
       },
       totalItems: {
         // Use Cart.getStatistics()

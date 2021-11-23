@@ -40,11 +40,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL(20, 2),
         allowNull: false,
       },
-      isActive: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
-      },
     },
     {
       sequelize,
