@@ -93,6 +93,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'shippingMethod',
       constraints: false,
     });
+
+    CheckoutToken.hasOne(models.Order, {
+      foreignKey: { name: 'checkoutTokenId' },
+      as: 'order',
+    });
   };
 
   return CheckoutToken;

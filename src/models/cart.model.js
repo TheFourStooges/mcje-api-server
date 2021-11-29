@@ -129,6 +129,11 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: { name: 'cartId', allowNull: false },
       as: 'cartItems',
     });
+
+    Cart.hasOne(models.CheckoutToken, {
+      foreignKey: { name: 'cartId' },
+      as: 'checkoutToken',
+    });
   };
 
   return Cart;
