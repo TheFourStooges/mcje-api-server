@@ -24,6 +24,58 @@ const updateCheckoutToken = {
   }),
 };
 
+const captureOrder = {
+  params: Joi.object().keys({
+    checkoutTokenId: Joi.string().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    customer: Joi.object()
+      .keys({
+        name: Joi.string().max(100).required(),
+        email: Joi.string().email().required(),
+      })
+      .required(),
+    shippingAddress: Joi.object()
+      .keys({
+        name: Joi.string().max(100).required(),
+        phone: Joi.string().min(10).max(13).regex(regexPatterns.phoneNumber).required(),
+        streetLine1: Joi.string().max(100).required(),
+        ward: Joi.string().max(100).required(),
+        district: Joi.string().max(100).required(),
+        city: Joi.string().max(100).required(),
+        postalCode: Joi.string().max(6).regex(regexPatterns.postalCode).required(),
+        country: Joi.string().max(100).required(),
+      })
+      .required(),
+    paymentInformation: Joi.object()
+      .keys({
+        paymentMethod: Joi.string().valid('card', 'bank-transfer', 'cash-on-delivery').required(),
+        cardNumber: Joi.when('paymentMethod', {
+          is: 'card',
+          then: Joi.string().creditCard().required(),
+        }),
+        cardCvv: Joi.when('paymentMethod', {
+          is: 'card',
+          then: Joi.string().min(3).max(3).regex(regexPatterns.cardCvv).required(),
+        }),
+        cardHolder: Joi.when('paymentMethod', {
+          is: 'card',
+          then: Joi.string().min(1).max(20).regex(regexPatterns.cardHolder).required(),
+        }),
+        cardExpiration: Joi.when('paymentMethod', {
+          is: 'card',
+          then: Joi.object()
+            .keys({
+              month: Joi.string().min(2).max(2).required(),
+              year: Joi.string().min(2).max(2).required(),
+            })
+            .required(),
+        }),
+      })
+      .required(),
+  }),
+};
+
 // const getCategories = {
 //   query: Joi.object().keys({
 //     name: Joi.string(),
@@ -100,6 +152,7 @@ module.exports = {
   generateCheckoutToken,
   getCheckoutToken,
   updateCheckoutToken,
+  captureOrder,
   // getCategories,
   getCart,
   // updateCategory,

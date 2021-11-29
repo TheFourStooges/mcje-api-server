@@ -22,10 +22,14 @@ const updateCheckoutToken = catchAsync(async (req, res) => {
   res.send(checkoutToken);
 });
 
-const captureOrder = catchAsync(async (req, res) => {});
+const captureOrder = catchAsync(async (req, res) => {
+  const newOrder = await checkoutService.captureOrder(req.user.id, req.params.checkoutTokenId, req.body);
+  res.send(newOrder);
+});
 
 module.exports = {
   generateCheckoutToken,
   getCheckoutToken,
   updateCheckoutToken,
+  captureOrder,
 };

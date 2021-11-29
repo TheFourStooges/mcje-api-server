@@ -37,6 +37,7 @@ const createCart = async (userId) => {
 };
 
 const getCartById = async (cartId, userId) => {
+  console.log('---->', cartId, userId);
   return Cart.findOne({
     where: { id: cartId, userId },
     include: [{ model: CartItem, as: 'cartItems', include: [{ model: Product, as: 'product' }] }],

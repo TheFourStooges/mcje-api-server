@@ -21,7 +21,8 @@ router
     auth('customerCartAndCheckout'),
     validate(checkoutValidation.updateCheckoutToken),
     checkoutController.updateCheckoutToken
-  );
+  )
+  .post(auth('customerCartAndCheckout'), validate(checkoutValidation.captureOrder), checkoutController.captureOrder);
 
 // router
 //   .route('/:cartId/items')
