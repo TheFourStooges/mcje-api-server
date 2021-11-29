@@ -137,10 +137,18 @@ module.exports = (sequelize, DataTypes) => {
     });
 
     User.hasMany(models.Cart, {
-      foreignKey: {
-        name: 'userId',
-      },
+      foreignKey: { name: 'userId' },
       as: 'carts',
+    });
+
+    User.hasMany(models.CheckoutToken, {
+      foreignKey: { name: 'userId' },
+      as: 'checkoutTokens',
+    });
+
+    User.hasMany(models.Order, {
+      foreignKey: { name: 'userId' },
+      as: 'orders',
     });
   };
 

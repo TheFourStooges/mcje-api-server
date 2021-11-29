@@ -86,7 +86,7 @@ module.exports = (sequelize, DataTypes) => {
             allowEmpty: false,
             properties: {
               name: { type: 'string', allowEmpty: false },
-              phone: { type: 'string', allowEmpty: false, minLength: 10, maxLength: 10, pattern: regexPatterns.phoneNumber },
+              phone: { type: 'string', allowEmpty: false, minLength: 10, maxLength: 13, pattern: regexPatterns.phoneNumber },
               streetLine1: { type: 'string', allowEmpty: false, maxLength: 100 },
               ward: { type: 'string', allowEmpty: false, maxLength: 100 },
               district: { type: 'string', allowEmpty: false, maxLength: 100 },
@@ -158,6 +158,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0.0,
       },
+      paymentMethod: {
+        type: DataTypes.ENUM,
+        values: ['card', 'bank-transfer', 'cash-on-delivery'],
+        allowNull: false,
+      },
     },
     {
       sequelize,
@@ -169,10 +174,10 @@ module.exports = (sequelize, DataTypes) => {
   Order.associate = (models) => {
     // Removed association with User, Cart, ShippingMethod in favor
     // of virtual fields
-    // Order.belongsTo(models.User, {
-    //   foreignKey: { name: 'userId' },
-    //   as: 'user',
-    // });
+    Order.belongsTo(models.User, {
+      foreignKey: { name: 'userId' },
+      as: 'user',
+    });
 
     // Order.belongsTo(models.Cart, {
     //   foreignKey: { name: 'cartId' },
@@ -192,6 +197,16 @@ module.exports = (sequelize, DataTypes) => {
     Order.hasMany(models.OrderItem, {
       foreignKey: { name: 'orderId', allowNull: false },
       as: 'orderItems',
+    });
+
+    Order.hasMany(models.OrderPayment, {
+      foreignKey: { name: 'orderId' },
+      as: 'orderPayments',
+    });
+
+    Order.hasMany(models.OrderFulfillment, {
+      foreignKey: { model: 'orderId' },
+      as: 'orderFulfillments',
     });
   };
 
