@@ -66,9 +66,14 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: true,
       },
       basePrice: {
-        type: DataTypes.DECIMAL(10, 2),
+        type: DataTypes.DECIMAL(20, 2),
         allowNull: false,
         defaultValue: 0.0,
+      },
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
       },
       properties: {
         type: DataTypes.JSONB,
@@ -147,23 +152,34 @@ module.exports = (sequelize, DataTypes) => {
     Product.belongsTo(models.Category, {
       foreignKey: {
         name: 'categoryId',
-        as: 'category',
       },
+      as: 'category',
     });
 
-    Product.belongsTo(models.ItemType, {
+    Product.belongsToMany(models.Tag, {
+      through: 'Tags_Products',
       foreignKey: {
-        name: 'itemTypeId',
-        as: 'itemType',
+        name: 'productId',
       },
+      otherKey: {
+        name: 'tagId',
+      },
+      as: 'tags',
     });
 
-    Product.belongsTo(models.TargetAudience, {
-      foreignKey: {
-        name: 'targetAudienceId',
-        as: 'targetAudience',
-      },
-    });
+    // Product.belongsTo(models.ItemType, {
+    //   foreignKey: {
+    //     name: 'itemTypeId',
+    //     as: 'itemType',
+    //   },
+    // });
+
+    // Product.belongsTo(models.TargetAudience, {
+    //   foreignKey: {
+    //     name: 'targetAudienceId',
+    //     as: 'targetAudience',
+    //   },
+    // });
 
     // Product.hasMany(models.ProductOptionGroup, {
     //   foreignKey: {
