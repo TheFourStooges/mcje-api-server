@@ -14,8 +14,8 @@ const db = {};
 // Folder structure based on https://github.com/williampruden/sequelize-associations
 
 const sequelize = new Sequelize(config.sequelize.database, config.sequelize.username, config.sequelize.password, {
-  host: '192.168.1.200',
-  dialect: 'postgres',
+  host: config.sequelize.host,
+  dialect: config.sequelize.dialect,
   logging: logger.debug.bind(logger),
 });
 
