@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 const slugify = require('slugify');
 const faker = require('faker');
-const attributesEnum = require('../config/attributesEnum');
+const attributesEnum = require('../config/enums/attributesEnum');
 const { Product, Category, User, Cart, sequelize } = require('../models');
 const { categoryService, productService } = require('../services');
 

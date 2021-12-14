@@ -6,7 +6,7 @@ const regexPatterns = require('../config/regexPatterns');
 // const ProductOptionGroup = require('./productOptionGroup.model');
 // const ProductVariant = require('./productVariant.model');
 const jsonbValidator = require('../utils/jsonbValidator');
-const attributesEnum = require('../config/attributesEnum');
+const attributesEnum = require('../config/enums/attributesEnum');
 
 module.exports = (sequelize, DataTypes) => {
   /**

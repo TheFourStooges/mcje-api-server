@@ -2,7 +2,7 @@ const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 const { idUnionSchema } = require('./schemas');
 const regexPatterns = require('../config/regexPatterns');
-const attributesEnum = require('../config/attributesEnum');
+const attributesEnum = require('../config/enums/attributesEnum');
 
 // const optionGroupSchema = Joi.object()
 //   .keys({
