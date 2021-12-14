@@ -1,6 +1,5 @@
 const httpStatus = require('http-status');
-const { productService } = require('.');
-const { Category, Product } = require('../models');
+const { Category } = require('../models');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
 

@@ -167,6 +167,13 @@ module.exports = (sequelize, DataTypes) => {
       as: 'tags',
     });
 
+    Product.hasMany(models.Asset, {
+      foreignKey: {
+        name: 'productId',
+      },
+      as: 'assets',
+    });
+
     // Product.belongsTo(models.ItemType, {
     //   foreignKey: {
     //     name: 'itemTypeId',

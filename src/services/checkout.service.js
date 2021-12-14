@@ -12,7 +12,7 @@ const {
 } = require('../models');
 const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
-const { cartService, paymentService } = require('.');
+const { cartService } = require('.');
 
 const cardPayment = (cardNumber, cardCvv, cardHolder, cardExpiration, receiptTotal) => {
   const sampleCards = [
