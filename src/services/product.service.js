@@ -1,14 +1,14 @@
 const httpStatus = require('http-status');
 // const logger = require('../config/logger');
 const { QueryTypes } = require('sequelize');
-const { Product, Category, sequelize } = require('../models');
+const { Product, Category, Asset, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
 const flattenObject = require('../utils/flattenObject');
 // const hasDuplicates = require('../utils/hasDuplicates');
 
 /**
- * Create a category. Noted that the category should have been validated by Joi.
+ * Create a product. Noted that the product should have been validated by Joi.
  * @param {Object} productBody
  * @returns {Promise<Product>}
  */
@@ -21,7 +21,7 @@ const createProduct = async (productBody) => {
 
   // Extract the categoryId from Body for pre-processing
   // Extract attributes key-value map as well
-  const { categoryId, ...restOfBody } = productBody;
+  const { categoryId, assets, ...restOfBody } = productBody;
 
   const t = await sequelize.transaction();
   let product;
@@ -30,6 +30,7 @@ const createProduct = async (productBody) => {
     // Create the new Product instance without categoryId
     // Product must be created here for the ID to be generated
     product = await Product.create(restOfBody);
+    const productId = product.get('id');
 
     // If categoryId object exists
     if (categoryId) {
@@ -39,6 +40,26 @@ const createProduct = async (productBody) => {
       const parentSqlId = parentCategory.get('id');
       // Then sets it as the new Product categoryId.
       product.set('categoryId', parentSqlId);
+    }
+
+    if (assets) {
+      // Verify if all asset ids exists
+      await Promise.all(
+        assets.map(
+          (assetId) =>
+            new Promise((resolve, reject) => {
+              Asset.findOne({ where: { id: assetId } }).then((asset) =>
+                asset ? resolve(asset) : reject(new Error(`Asset ${assetId} not found`))
+              );
+            })
+        )
+      );
+
+      // Associate new images set
+      await sequelize.query('UPDATE "Assets" SET "productId" = :productId WHERE "id" IN (:assetIds)', {
+        replacements: { productId, assetIds: [...assets] },
+        type: QueryTypes.UPDATE,
+      });
     }
 
     // Save and commit transaction to database
@@ -63,12 +84,12 @@ const createProduct = async (productBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryProducts = async (filter, options) => {
-  const users = await paginate(Product, filter, options);
+  const users = await paginate(Product, filter, options, [{ model: Asset, as: 'assets' }]);
   return users;
 };
 
 /**
- * Get category by id
+ * Get product by id
  * @param {ObjectId} id
  * @returns {Promise<Product>}
  */
@@ -76,22 +97,24 @@ const getProductById = async (id) => {
   // return Product.findByPk(id);
   return Product.findOne({
     where: { id },
+    include: [{ model: Asset, as: 'assets' }],
   });
 };
 
 /**
- * Get category by slug
+ * Get product by slug
  * @param {string} slug
  * @returns {Promise<Product>}
  */
 const getProductBySlug = async (slug) => {
   return Product.findOne({
     where: { slug },
+    include: [{ model: Asset, as: 'assets' }],
   });
 };
 
 // /**
-//  * Get category by WebID
+//  * Get product by WebID
 //  * @param {string} webId
 //  * @returns {Promise<Product>}
 //  */
@@ -115,7 +138,7 @@ const updateProductById = async (productId, updateBody) => {
   }
 
   // Extract the categoryId from Body for pre-processing
-  const { properties, categoryId, ...restOfBody } = updateBody;
+  const { properties, categoryId, assets, ...restOfBody } = updateBody;
 
   const t = await sequelize.transaction();
   try {
@@ -140,17 +163,25 @@ const updateProductById = async (productId, updateBody) => {
       // console.log(JSON.stringify(existing, null, 4));
       // product.set('properties', existing);
 
+      // Flatten the properties object from tree-like to flat (seperated by dots)
       const flattenedProperties = flattenObject(properties);
 
       Promise.all(
         Object.entries(flattenedProperties).map(async ([key, value]) => {
+          // For each properties flattened
+
+          // Split the key into tokens
+          // I.e.: properties.material.materialType => properties, material, materialType
           const tokens = key.split('.');
 
+          // Initialize empty string
           // resulting string will be of format '"token",[...]"token",'
           let pathInner = '';
 
           // NO FOR EACH IN TRANSACTION!!!!!
           // tokens.forEach((token) => pathInner.concat(`"${token},"`));
+          // Generate valid PostgreSQL JSONB path
+          // I.e. properties.material.materialType --> '"properties","material","materialType",'
           // eslint-disable-next-line no-restricted-syntax
           for (const i in tokens) {
             if (tokens[i]) {
@@ -158,12 +189,12 @@ const updateProductById = async (productId, updateBody) => {
             }
           }
 
+          // Remove the trailing comma seperator before passing into raw SQL query
           const path = `{${pathInner.substring(0, pathInner.length - 1)}}`;
 
-          // therefore we need to trim the last character ',' before passing into raw query
           // https://stackoverflow.com/questions/24257726/could-not-determine-polymorphic-type-because-input-has-type-unknown
           await sequelize.query(
-            'UPDATE "Products" SET properties = jsonb_set(properties, :path, to_jsonb(:value::text)) WHERE id = :productId',
+            'UPDATE "Products" SET "properties" = jsonb_set(properties, :path, to_jsonb(:value::text)) WHERE "id" = :productId',
             {
               replacements: {
                 path,
@@ -180,6 +211,32 @@ const updateProductById = async (productId, updateBody) => {
       //   console.log(key, value);
       //   await product.update({ key: value });
       // });
+    }
+
+    if (assets) {
+      // Verify if all asset ids exists
+      await Promise.all(
+        assets.map(
+          (assetId) =>
+            new Promise((resolve, reject) => {
+              Asset.findOne({ where: { id: assetId } }).then((asset) =>
+                asset ? resolve(asset) : reject(new Error(`Asset ${assetId} not found`))
+              );
+            })
+        )
+      );
+
+      // Unassociate old images set
+      await sequelize.query('UPDATE "Assets" SET "productId" = NULL WHERE "productId" = :productId', {
+        replacements: { productId },
+        type: QueryTypes.UPDATE,
+      });
+
+      // Associate new images set
+      await sequelize.query('UPDATE "Assets" SET "productId" = :productId WHERE "id" IN (:assetIds)', {
+        replacements: { productId, assetIds: [...assets] },
+        type: QueryTypes.UPDATE,
+      });
     }
 
     Object.assign(product, restOfBody);
@@ -214,12 +271,12 @@ const updateProductById = async (productId, updateBody) => {
  * @returns {Promise<Product>}
  */
 const deleteProductById = async (productId) => {
-  const category = await getProductById(productId);
-  if (!category) {
+  const product = await getProductById(productId);
+  if (!product) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
   }
-  await category.destroy();
-  return category;
+  await product.destroy();
+  return product;
 };
 
 module.exports = {
