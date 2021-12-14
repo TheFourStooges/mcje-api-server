@@ -1,4 +1,5 @@
 const { Model } = require('sequelize');
+const cartCheckoutStatusEnum = require('../config/enums/cartCheckoutStatusEnum');
 // const regexPatterns = require('../config/regexPatterns');
 // const jsonbValidator = require('../utils/jsonbValidator');
 
@@ -23,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       status: {
         type: DataTypes.ENUM,
-        values: ['created', 'captured'],
+        values: [...cartCheckoutStatusEnum.checkoutTokenStatus],
         defaultValue: 'created',
       },
       totalItems: {
