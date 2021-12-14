@@ -30,6 +30,9 @@ const envVarsSchema = Joi.object()
     SMTP_USERNAME: Joi.string().description('username for email server'),
     SMTP_PASSWORD: Joi.string().description('password for email server'),
     EMAIL_FROM: Joi.string().description('the from field in the emails sent by the app'),
+    UPLOAD_PATH: Joi.string()
+      .description('Relative path to the process.cwd() to store images')
+      .default('/public/data/uploads'),
   })
   .unknown();
 
@@ -42,7 +45,7 @@ if (error) {
 module.exports = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
-  sequelize: {
+  sql: {
     dialect: envVars.SQL_DIALECT,
     host: envVars.SQL_HOST,
     database: envVars.SQL_DATABASE,
@@ -80,5 +83,8 @@ module.exports = {
       },
     },
     from: envVars.EMAIL_FROM,
+  },
+  uploads: {
+    path: envVars.UPLOAD_PATH,
   },
 };
