@@ -169,3 +169,6 @@ dist
 # SQLite3 Temporary Database
 *.sqlite3
 *.db
+
+# Public static folder
+public
