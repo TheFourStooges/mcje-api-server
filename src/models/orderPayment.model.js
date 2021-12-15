@@ -1,4 +1,5 @@
 const { Model } = require('sequelize');
+const orderStatusEnum = require('../config/enums/orderStatusEnum');
 
 module.exports = (sequelize, DataTypes) => {
   class OrderPayment extends Model {}
@@ -19,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       type: {
         type: DataTypes.ENUM,
-        values: ['card', 'bank-transfer', 'cash-on-delivery', 'refund'],
+        values: [...orderStatusEnum.orderPaymentType],
         allowNull: false,
       },
       amount: {
