@@ -7,6 +7,8 @@ const productRoute = require('./product.route');
 const cartRoute = require('./cart.route');
 const checkoutRoute = require('./checkout.route');
 const assetRoute = require('./asset.route');
+const shippingMethodRoute = require('./shippingMethod.route');
+const orderManageRoute = require('./orderManage.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -39,6 +41,14 @@ const defaultRoutes = [
   {
     path: '/asset',
     route: assetRoute,
+  },
+  {
+    path: '/shipping-method',
+    route: shippingMethodRoute,
+  },
+  {
+    path: '/order',
+    route: orderManageRoute,
   },
 ];
 

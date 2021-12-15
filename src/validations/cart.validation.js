@@ -29,7 +29,7 @@ const addItemToCart = {
     cartId: Joi.string().custom(objectId),
   }),
   body: Joi.object().keys({
-    productId: Joi.string().custom(objectId),
+    productId: Joi.string().custom(objectId).required(),
     quantity: Joi.number().integer().positive().default(1),
   }),
 };

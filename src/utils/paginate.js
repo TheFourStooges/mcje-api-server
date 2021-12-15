@@ -78,6 +78,7 @@ const paginate = async (model, whereClause, options, eagerLoadInclude) => {
       limit,
       totalPages: Math.ceil(count / limit),
       totalResults: count,
+      resultsThisPage: count - skip >= limit ? limit : count - skip,
     },
   };
 

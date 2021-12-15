@@ -9,7 +9,7 @@ const createCategory = {
     slug: Joi.string().required(),
     description: Joi.string(),
     isActive: Joi.boolean(),
-    assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
+    // assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
     parentId: idUnionSchema,
   }),
 };
@@ -41,7 +41,7 @@ const updateCategory = {
       slug: Joi.string(),
       description: Joi.string(),
       isActive: Joi.boolean(),
-      assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
+      // assets: Joi.array().items(Joi.string().custom(objectId)).has(Joi.string().custom(objectId)).min(0).max(16).unique(),
       parentId: idUnionSchema,
     })
     .min(1),

@@ -5,7 +5,8 @@ const catchAsync = require('../utils/catchAsync');
 const { checkoutService } = require('../services');
 
 const generateCheckoutToken = catchAsync(async (req, res) => {
-  const checkoutToken = await checkoutService.generateCheckoutToken(req.user.id, req.body.cartId);
+  console.log('CheckoutController-->', req.user.id, req.query.cartId);
+  const checkoutToken = await checkoutService.generateCheckoutToken(req.user.id, req.query.cartId);
   res.status(httpStatus.CREATED).send(checkoutToken);
 });
 

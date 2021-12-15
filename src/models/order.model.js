@@ -1,5 +1,6 @@
 const { Model, QueryTypes } = require('sequelize');
 const regexPatterns = require('../config/regexPatterns');
+const orderStatusEnum = require('../config/enums/orderStatusEnum');
 const jsonbValidator = require('../utils/jsonbValidator');
 
 module.exports = (sequelize, DataTypes) => {
@@ -99,19 +100,19 @@ module.exports = (sequelize, DataTypes) => {
       },
       fulfillmentStatus: {
         type: DataTypes.ENUM,
-        values: ['await-confirmation', 'shipping', 'fulfilled'],
+        values: [...orderStatusEnum.orderFulfillmentStatus],
         allowNull: false,
         defaultValue: 'await-confirmation',
       },
       paymentStatus: {
         type: DataTypes.ENUM,
-        values: ['not-paid', 'paid-not-in-full', 'paid-in-full'],
+        values: [...orderStatusEnum.orderPaymentStatus],
         allowNull: false,
         defaultValue: 'not-paid',
       },
       status: {
         type: DataTypes.ENUM,
-        values: ['created', 'completed', 'refunded'],
+        values: [...orderStatusEnum.orderStatus],
         allowNull: false,
         defaultValue: 'created',
       },

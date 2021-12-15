@@ -182,8 +182,11 @@ const updateCheckoutTokenById = async (userId, checkoutTokenId, updateBody) => {
     if (shippingMethodId) {
       const shippingMethod = await ShippingMethod.findOne({ where: shippingMethodId });
 
-      if (shippingMethod) {
-        const legitId = shippingMethod.get('id');
+      if (!shippingMethod) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Shipping Method not found');
+      }
+
+      const legitId = shippingMethod.get('id');
         checkoutToken.set('shippingMethodId', legitId);
 
         const shippingCost = Number.parseFloat(shippingMethod.get('price'));
@@ -193,7 +196,6 @@ const updateCheckoutTokenById = async (userId, checkoutTokenId, updateBody) => {
           total: subtotal + shippingCost,
           totalWithTax: subtotal + tax + shippingCost,
         });
-      }
     }
 
     Object.assign(checkoutToken, restOfBody);
