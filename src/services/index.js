@@ -13,3 +13,4 @@ module.exports.cartService = require('./cart.service');
 module.exports.checkoutService = require('./checkout.service');
 module.exports.assetService = require('./asset.service');
 module.exports.orderManageService = require('./orderManage.service');
+module.exports.shippingMethodService = require('./shippingMethod.service');
