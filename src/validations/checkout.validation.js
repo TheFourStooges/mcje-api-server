@@ -4,7 +4,7 @@ const { idUnionSchema } = require('./schemas');
 const regexPatterns = require('../config/regexPatterns');
 
 const generateCheckoutToken = {
-  body: Joi.object().keys({
+  query: Joi.object().keys({
     cartId: Joi.string().custom(objectId).required(),
   }),
 };
