@@ -39,10 +39,10 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   OrderFulfillment.associate = (models) => {
-    OrderFulfillment.belongsTo(models.Order, {
-      // foreignKey: { name: 'orderId' },
-      as: 'order',
-    });
+    // OrderFulfillment.belongsTo(models.Order, {
+    //   // foreignKey: { name: 'orderId' },
+    //   as: 'order',
+    // });
   };
   return OrderFulfillment;
 };

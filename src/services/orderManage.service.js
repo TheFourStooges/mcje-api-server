@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const flattenObject = require('../utils/flattenObject');
 const paginate = require('../utils/paginate');
 const orderStatusEnum = require('../config/enums/orderStatusEnum');
+const logger = require('../config/logger');
 
 /**
  * Query for orders
@@ -258,9 +259,18 @@ const addOrderFulfillment = async (orderId, addFulfillmentBody) => {
       finalTrackingNumber = result.trackingNumber;
     }
     const fulfillment = await OrderFulfillment.create(
-      { ...restOfBody, orderId, trackingNumber: trackingNumber || finalTrackingNumber },
+      { ...restOfBody, OrderId: orderId, trackingNumber: trackingNumber || finalTrackingNumber },
       { transaction: t }
     );
+
+    // If transactionType is the last type before needing to bump the
+    // order's fulfillmentStatus, do so!
+    if (validTxTypes.at(-1) === transactionType) {
+      const currentFulfillmentStatusIdx = orderStatusEnum.orderFulfillmentStatus.indexOf(fulfillmentStatus);
+      const nextFulfillmentStatus = orderStatusEnum.orderFulfillmentStatus.at(currentFulfillmentStatusIdx + 1);
+      await order.update({ fulfillmentStatus: nextFulfillmentStatus }, { transaction: t });
+      logger.info(`Order ${orderId} fulfillmentStatus bumped to ${nextFulfillmentStatus}`);
+    }
 
     await t.commit();
     return fulfillment;

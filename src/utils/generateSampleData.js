@@ -2,7 +2,7 @@
 const slugify = require('slugify');
 const faker = require('faker');
 const attributesEnum = require('../config/enums/attributesEnum');
-const { Product, Category, User, Cart, sequelize } = require('../models');
+const { Product, Category, User, Cart, ShippingMethod, sequelize } = require('../models');
 const { categoryService, productService } = require('../services');
 
 const generateUsers = async () => {
@@ -203,10 +203,28 @@ const generateProducts = async () => {
   // Promise.all(products.map((product) => productService.createProduct(product)));
 };
 
+const generateShippingMethods = async () => {
+  const methods = [
+    {
+      description: 'Giao hang tiet kiem',
+      provider: 'GHTK',
+      price: 0.99,
+    },
+    {
+      description: 'Giao hang dat tien',
+      provider: 'GHDT',
+      price: 690.99,
+    },
+  ];
+
+  await Promise.all(methods.map((method) => ShippingMethod.create(method)));
+};
+
 const generateSampleData = async () => {
   await generateUsers();
   await generateCategories();
   await generateProducts();
+  await generateShippingMethods();
 };
 
 module.exports = generateSampleData;
