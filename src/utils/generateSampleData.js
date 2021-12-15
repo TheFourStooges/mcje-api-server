@@ -21,7 +21,7 @@ const generateUsers = async () => {
     },
   ];
 
-  Promise.all(users.map((user) => User.create(user)));
+  await Promise.all(users.map((user) => User.create(user)));
 };
 
 const generateCategories = async () => {
