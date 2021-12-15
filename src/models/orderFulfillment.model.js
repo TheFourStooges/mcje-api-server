@@ -1,4 +1,5 @@
 const { Model } = require('sequelize');
+const orderStatusEnum = require('../config/enums/orderStatusEnum');
 
 module.exports = (sequelize, DataTypes) => {
   class OrderFulfillment extends Model {}
@@ -26,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       type: {
         type: DataTypes.ENUM,
-        values: ['hand-off-to-carrier', 'in-transit', 'delivered'],
+        values: [...orderStatusEnum.orderFulfillmentType],
         defaultValue: 'hand-off-to-carrier',
       },
     },
@@ -39,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
 
   OrderFulfillment.associate = (models) => {
     OrderFulfillment.belongsTo(models.Order, {
-      foreignKey: { name: 'orderId' },
+      // foreignKey: { name: 'orderId' },
       as: 'order',
     });
   };

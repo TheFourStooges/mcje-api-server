@@ -66,6 +66,20 @@ const addOrderPayment = {
   }),
 };
 
+const addOrderFulfillment = {
+  params: Joi.object().keys({
+    orderId: Joi.required().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    description: Joi.string().required(),
+    carrier: Joi.string().required(),
+    type: Joi.string()
+      .valid(...orderStatusEnum.orderFulfillmentType)
+      .required(),
+    trackingNumber: Joi.string(),
+  }),
+};
+
 // const deleteCategory = {
 //   params: Joi.object().keys({
 //     categoryId: Joi.string().custom(objectId),
@@ -78,5 +92,6 @@ module.exports = {
   getOrder,
   updateOrder,
   addOrderPayment,
+  addOrderFulfillment,
   // deleteCategory,
 };

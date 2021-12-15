@@ -4,6 +4,7 @@ const { Order, OrderPayment, OrderFulfillment, sequelize } = require('../models'
 const ApiError = require('../utils/ApiError');
 const flattenObject = require('../utils/flattenObject');
 const paginate = require('../utils/paginate');
+const orderStatusEnum = require('../config/enums/orderStatusEnum');
 
 /**
  * Query for orders
@@ -190,9 +191,7 @@ const addOrderPayment = async (orderId, addPaymentBody) => {
         - (SELECT COALESCE(SUM("amount"), 0) FROM "OrderPayments" WHERE "orderId" = :orderId) AS "remainingBalance"
       `,
       {
-        replacements: {
-          orderId,
-        },
+        replacements: { orderId },
         type: QueryTypes.SELECT,
         transaction: t,
       }
@@ -212,20 +211,63 @@ const addOrderPayment = async (orderId, addPaymentBody) => {
     await t.rollback();
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
-  // const orderTotalWithTax = order.get('totalWithTax');
+};
 
-  // const [result, metadata] = await sequelize.query(
-  //   'SELECT SUM("amount") AS "payments_sum" FROM "OrderPayments" WHERE "orderId" = :orderId',
-  //   {
-  //     replacements: {
-  //       orderId,
-  //     },
-  //     type: QueryTypes.SELECT,
-  //   }
-  // );
-  // const paymentsSum = result.payments_sum;
+const addOrderFulfillment = async (orderId, addFulfillmentBody) => {
+  const order = await getOrderById(orderId);
+  if (!order) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Order not found');
+  }
 
-  // const orderBalance = orderTotalWithTax - paymentsSum;
+  const { trackingNumber, ...restOfBody } = addFulfillmentBody;
+  let finalTrackingNumber;
+
+  const t = await sequelize.transaction();
+  try {
+    await order.reload();
+    const fulfillmentStatus = order.get('fulfillmentStatus');
+    const transactionType = addFulfillmentBody.type;
+
+    const validTxTypes = [...orderStatusEnum.fulfillmentStatusToTransactionTypeMapping[fulfillmentStatus]];
+    if (!validTxTypes.includes(transactionType)) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        `${transactionType} should not be inserted into order with status ${fulfillmentStatus}`
+      );
+    }
+
+    if (!trackingNumber) {
+      // If trackingNumber is not provided (meaning no tracking number change)
+      const [result, metadata] = await sequelize.query(
+        `
+        SELECT "trackingNumber" FROM "OrderFulfillments"
+        WHERE "orderId" = :orderId
+        ORDER BY "OrderFulfillments"."createdAt" DESC
+        LIMIT 1
+        `,
+        {
+          replacements: { orderId },
+          type: QueryTypes.SELECT,
+          transaction: t,
+        }
+      );
+
+      if (!result) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'First FulfillmentHistory entry should have trackingNumber');
+      }
+      finalTrackingNumber = result.trackingNumber;
+    }
+    const fulfillment = await OrderFulfillment.create(
+      { ...restOfBody, orderId, trackingNumber: trackingNumber || finalTrackingNumber },
+      { transaction: t }
+    );
+
+    await t.commit();
+    return fulfillment;
+  } catch (error) {
+    await t.rollback();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
+  }
 };
 
 module.exports = {
@@ -234,4 +276,5 @@ module.exports = {
   getOrderByReference,
   updateOrderById,
   addOrderPayment,
+  addOrderFulfillment,
 };

@@ -29,9 +29,15 @@ const addOrderPayment = catchAsync(async (req, res) => {
   res.send(payment);
 });
 
+const addOrderFulfillment = catchAsync(async (req, res) => {
+  const fulfillment = await orderManageService.addOrderFulfillment(req.params.orderId, req.body);
+  res.send(fulfillment);
+});
+
 module.exports = {
   getOrders,
   getOrder,
   updateOrder,
   addOrderPayment,
+  addOrderFulfillment,
 };

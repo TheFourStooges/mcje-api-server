@@ -10,6 +10,14 @@ router
   .route('/:orderId/add-payment')
   .post(auth('manageOrders'), validate(orderManageValidation.addOrderPayment), orderManageController.addOrderPayment);
 
+router
+  .route('/:orderId/add-fulfillment')
+  .post(
+    auth('manageOrders'),
+    validate(orderManageValidation.addOrderFulfillment),
+    orderManageController.addOrderFulfillment
+  );
+
 router.route('/').get(auth('getOrders'), validate(orderManageValidation.getOrders), orderManageController.getOrders);
 
 // /product/{productId}
