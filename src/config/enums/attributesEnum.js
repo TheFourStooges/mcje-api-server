@@ -7,6 +7,7 @@ const productType = [
   'FineRing',
   'FineEarring',
   'FineOther',
+  'NONE',
 ];
 
 // ProductType LIKE '%NecklaceBraceletAnklet'
@@ -36,6 +37,7 @@ const claspType = [
   'spring-rings-clasps-with-terminals',
   'toggle-clasps',
   'other-clasp-type',
+  'NONE',
 ];
 
 const chainType = [
@@ -101,6 +103,7 @@ const chainType = [
   'wheat',
   'wire-cable',
   'other-chain-type',
+  'NONE',
 ];
 
 // ProductType LIKE '%Earring'
@@ -117,6 +120,7 @@ const backFinding = [
   'post-with-snap-down',
   'screw-back',
   'shepherds-hook',
+  'NONE',
 ];
 
 // ProductType LIKE '%Ring'
@@ -142,6 +146,7 @@ const ringSize = [
   '12',
   '12.5',
   '13',
+  'NONE',
 ];
 
 // ====================================================================================================================
@@ -353,6 +358,7 @@ const material = [
   'zandrite',
   'zircon-gemstone',
   'zoisite',
+  'NONE',
 ];
 
 // MaterialType HAS 'gemstone'
@@ -509,6 +515,7 @@ const gemType = [
   'zandrite',
   'zircon-gemstone',
   'zoisite',
+  'NONE',
 ];
 
 const stoneCut = [
@@ -520,6 +527,7 @@ const stoneCut = [
   'mixed-cut',
   'checkerboard-cut',
   'fantasy-cut',
+  'NONE',
 ];
 
 const stoneColor = [
@@ -574,6 +582,7 @@ const stoneColor = [
   'yellow-green',
   'yellow-orange',
   'other-color',
+  'NONE',
 ];
 
 const stoneClarity = [
@@ -595,6 +604,7 @@ const stoneClarity = [
   'VVS', // Very Very Slight Inclusions
   'VVS1',
   'VVS2',
+  'NONE',
 ];
 
 const stoneShape = [
@@ -616,6 +626,7 @@ const stoneShape = [
   'square-shape',
   'trapezoid-shape',
   'triangle-shape',
+  'NONE',
 ];
 
 // MaterialType HAS 'pearl'
@@ -633,6 +644,7 @@ const pearlType = [
   'south-sea-baroque-cultured',
   'south-sea-cultured',
   'tahitian-cultured',
+  'NONE',
 ];
 
 const pearlColor = [
@@ -663,9 +675,10 @@ const pearlColor = [
   'died-pink',
   'died-yellow',
   'other-color',
+  'NONE',
 ];
 
-const pearlLuster = ['low-luster', 'medium-luster', 'high-luster'];
+const pearlLuster = ['low-luster', 'medium-luster', 'high-luster', 'NONE'];
 
 const pearlShape = [
   'baroque',
@@ -678,11 +691,19 @@ const pearlShape = [
   'semibaroque',
   'semiround',
   'tear-drop',
+  'NONE',
 ];
 
-const pearlUniformity = ['fair-to-good', 'good', 'good-to-very-good', 'very-good'];
+const pearlUniformity = ['fair-to-good', 'good', 'good-to-very-good', 'very-good', 'NONE'];
 
-const surfaceMarking = ['heavily-blemished', 'moderately-blemished', 'lightly-blemished', 'very-lightly-blemished', 'clean'];
+const surfaceMarking = [
+  'heavily-blemished',
+  'moderately-blemished',
+  'lightly-blemished',
+  'very-lightly-blemished',
+  'clean',
+  'NONE',
+];
 
 const stringingMethod = [
   'double-knotted',
@@ -692,6 +713,7 @@ const stringingMethod = [
   'single-knotted',
   'unknotted-on-string',
   'unknotted-on-wire',
+  'NONE',
 ];
 
 const sizePerPearl = [
@@ -748,6 +770,7 @@ const sizePerPearl = [
   '15.5mm',
   'over-15mm',
   'graduated-size-in-millimeters',
+  'NONE',
 ];
 
 // MaterialType HAS 'gemstone' OR 'pearl'
@@ -789,6 +812,7 @@ const settingType = [
   'wrap-setting',
   'v-prong-setting',
   'other-setting-type',
+  'NONE',
 ];
 
 // MaterialType HAS 'metal'
@@ -813,6 +837,7 @@ const metalType = [
   'vermeil',
   'white-gold',
   'yellow-gold',
+  'NONE',
 ];
 
 const metalStamp = [
@@ -828,9 +853,10 @@ const metalStamp = [
   '925-sterling-and-14k',
   '925-sterling-and-18k',
   '.999-silver',
+  'NONE',
 ];
 
-const inscription = ['no', 'stone', 'setting'];
+const inscription = ['no', 'stone', 'setting', 'NONE'];
 
 module.exports = {
   productType,
