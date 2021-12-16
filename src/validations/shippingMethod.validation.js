@@ -15,6 +15,7 @@ const getShippingMethods = {
   query: Joi.object().keys({
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
+    sortBy: Joi.string(),
   }),
 };
 

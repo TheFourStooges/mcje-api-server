@@ -20,7 +20,7 @@ const createProduct = {
     isActive: Joi.boolean(),
     categoryId: idUnionSchema,
     basePrice: Joi.number().precision(2).positive().required(),
-    quantity: Joi.number().integer().positive().required(),
+    quantity: Joi.number().integer().positive().min(0),
     // https://stackoverflow.com/questions/54483904/how-to-use-joi-to-validate-map-object-map-keys-and-map-values
     // attributes: Joi.object().pattern(Joi.string().regex(regexPatterns.uuidv4), Joi.string().regex(regexPatterns.uuidv4)),
     // optionGroups: Joi.array().items(optionGroupSchema),
@@ -213,6 +213,7 @@ const updateProduct = {
       description: Joi.string(),
       isActive: Joi.boolean(),
       categoryId: idUnionSchema,
+      quantity: Joi.number().integer().min(0),
       basePrice: Joi.number().precision(2).positive(),
       // https://stackoverflow.com/questions/54483904/how-to-use-joi-to-validate-map-object-map-keys-and-map-values
       // attributes: Joi.object().pattern(Joi.string().regex(regexPatterns.uuidv4), Joi.string().regex(regexPatterns.uuidv4)),

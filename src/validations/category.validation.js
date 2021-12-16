@@ -18,7 +18,7 @@ const getCategories = {
   query: Joi.object().keys({
     name: Joi.string(),
     slug: Joi.string().regex(regexPatterns.slug),
-    webId: Joi.string().regex(regexPatterns.uuidv4),
+    sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
     parentId: Joi.string().custom(objectId),
