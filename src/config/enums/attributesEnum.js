@@ -26,7 +26,7 @@ const claspType = [
   'multistrand-box-clasps',
   'pearl-clasps',
   'pin-stem-with-safety-clasps',
-  'post-and-nut (tie-tac-finding)',
+  'post-and-nut',
   'push-button-clasps',
   'screw-barrel-clasps',
   'screw-barrel-with-safety-clasps',
