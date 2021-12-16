@@ -11,7 +11,7 @@ const createShippingMethod = catchAsync(async (req, res) => {
 
 const getShippingMethods = catchAsync(async (req, res) => {
   const filter = pick(req.query, []);
-  const options = pick(req.query, ['limit', 'page']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await shippingMethodService.queryShippingMethods(filter, options);
   res.send(result);
 });

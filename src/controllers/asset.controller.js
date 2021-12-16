@@ -11,7 +11,7 @@ const createAsset = catchAsync(async (req, res) => {
 
 const getAssets = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['productId']);
-  const options = pick(req.query, ['limit', 'page']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await assetService.queryAssets(filter, options);
   res.send(result);
 });
