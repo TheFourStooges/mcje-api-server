@@ -45,7 +45,7 @@ const updateProduct = catchAsync(async (req, res) => {
 
 const deleteProduct = catchAsync(async (req, res) => {
   await productService.deleteProductById(req.params.productId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.OK).send({ id: req.params.productId, deleted: true });
 });
 
 module.exports = {

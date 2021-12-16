@@ -31,7 +31,7 @@ const updateAsset = catchAsync(async (req, res) => {
 
 const deleteAsset = catchAsync(async (req, res) => {
   await assetService.deleteCategoryById(req.params.assetId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.OK).send({ id: req.params.assetId, deleted: true });
 });
 
 module.exports = {

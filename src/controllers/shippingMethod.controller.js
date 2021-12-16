@@ -31,7 +31,7 @@ const updateShippingMethod = catchAsync(async (req, res) => {
 
 const deleteShippingMethod = catchAsync(async (req, res) => {
   await shippingMethodService.deleteShippingMethodById(req.params.shippingMethodId);
-  res.status(httpStatus.NO_CONTENT).send();
+  res.status(httpStatus.OK).send({ id: req.params.shippingMethodId, deleted: true });
 });
 
 module.exports = {
