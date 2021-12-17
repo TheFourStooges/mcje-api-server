@@ -16,7 +16,7 @@ const createAsset = async (assetBody, assetFile) => {
 
   // Extract the parentId from Body for pre-processing
   const { productId, ...restOfBody } = assetBody;
-  const tempPath = assetFile.path;
+  // const tempPath = assetFile.path;
 
   // {
   //   fieldname: 'image',
@@ -28,9 +28,9 @@ const createAsset = async (assetBody, assetFile) => {
   //   path: '/home/pcminh/mcje-api-server/public/data/uploads/image-1639473119880-893005986',
   //   size: 1733
   // }
-  console.log(assetFile);
-  console.log(assetBody);
-  console.log(tempPath);
+  // console.log(assetFile);
+  // console.log(assetBody);
+  // console.log(tempPath);
 
   // console.log('---->', parentId);
   // console.log('---->', restOfBody);

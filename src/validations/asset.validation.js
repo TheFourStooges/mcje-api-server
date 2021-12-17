@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 const { idUnionSchema } = require('./schemas');
-const regexPatterns = require('../config/regexPatterns');
+// const regexPatterns = require('../config/regexPatterns');
 
 const createAsset = {
   body: Joi.object().keys({

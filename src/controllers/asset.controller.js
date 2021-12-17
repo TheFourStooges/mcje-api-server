@@ -17,7 +17,7 @@ const getAssets = catchAsync(async (req, res) => {
 });
 
 const getAsset = catchAsync(async (req, res) => {
-  const asset = await assetService.getCategoryById(req.params.assetId);
+  const asset = await assetService.getAssetById(req.params.assetId);
   if (!asset) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Asset not found');
   }
@@ -25,12 +25,12 @@ const getAsset = catchAsync(async (req, res) => {
 });
 
 const updateAsset = catchAsync(async (req, res) => {
-  const asset = await assetService.updateCategoryById(req.params.assetId, req.body);
+  const asset = await assetService.updateAssetById(req.params.assetId, req.body);
   res.send(asset);
 });
 
 const deleteAsset = catchAsync(async (req, res) => {
-  await assetService.deleteCategoryById(req.params.assetId);
+  await assetService.deleteAssetById(req.params.assetId);
   res.status(httpStatus.OK).send({ id: req.params.assetId, deleted: true });
 });
 
