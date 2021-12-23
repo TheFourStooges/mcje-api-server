@@ -84,7 +84,10 @@ const createProduct = async (productBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryProducts = async (filter, options) => {
-  const users = await paginate(Product, filter, options, [{ model: Asset, as: 'assets' }]);
+  const users = await paginate(Product, filter, options, [
+    { model: Asset, as: 'assets' },
+    { model: Category, as: 'category' },
+  ]);
   return users;
 };
 
@@ -112,7 +115,10 @@ const getProductById = async (id) => {
 const getProductBySlug = async (slug) => {
   return Product.findOne({
     where: { slug },
-    include: [{ model: Asset, as: 'assets' }],
+    include: [
+      { model: Asset, as: 'assets' },
+      { model: Category, as: 'category' },
+    ],
   });
 };
 

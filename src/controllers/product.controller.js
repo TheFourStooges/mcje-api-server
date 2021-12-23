@@ -25,8 +25,8 @@ const getProduct = catchAsync(async (req, res) => {
   // console.log('---->', req.body);
   // const category = await productService.getProductById(req.params.productId);
   let category;
-
-  if (req.body.type === 'slug') {
+  console.log(req.query.type === 'slug', req.query.type);
+  if (req.query.type === 'slug') {
     category = await productService.getProductBySlug(req.params.productId);
   } else {
     category = await productService.getProductById(req.params.productId);

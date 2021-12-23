@@ -197,7 +197,7 @@ const getProduct = {
   params: Joi.object().keys({
     productId: Joi.string().custom(objectId),
   }),
-  body: Joi.object().keys({
+  query: Joi.object().keys({
     type: Joi.string().valid('id', 'slug', 'sku'),
   }),
 };
