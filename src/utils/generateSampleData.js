@@ -2,7 +2,7 @@
 const slugify = require('slugify');
 const faker = require('faker');
 const attributesEnum = require('../config/enums/attributesEnum');
-const { Product, Category, User, Cart, ShippingMethod, sequelize } = require('../models');
+const { Product, Category, User, Cart, ShippingMethod, Asset, sequelize } = require('../models');
 const { categoryService, productService } = require('../services');
 
 const generateUsers = async () => {
@@ -200,7 +200,29 @@ const generateProducts = async () => {
 
   console.log(products);
 
-  Product.bulkCreate(products, { validate: true, benchmark: true });
+  const t = await sequelize.transaction();
+  try {
+    // eslint-disable-next-line no-restricted-syntax
+    await Promise.all(
+      products.map((product) =>
+        Product.create(
+          {
+            ...product,
+            assets: [
+              {
+                path: `/public/data/uploads/anh${Math.floor(Math.random() * 14) + 1}.png`,
+              },
+            ],
+          },
+          { include: [{ model: Asset, as: 'assets' }] }
+        )
+      )
+    );
+  } catch (error) {
+    await t.rollback();
+  }
+
+  // Product.bulkCreate(products, { validate: true, benchmark: true });
 
   // Promise.all(products.map((product) => productService.createProduct(product)));
 };
@@ -223,10 +245,10 @@ const generateShippingMethods = async () => {
 };
 
 const generateSampleData = async () => {
-  await generateUsers();
-  await generateCategories();
+  // await generateUsers();
+  // await generateCategories();
   await generateProducts();
-  await generateShippingMethods();
+  // await generateShippingMethods();
 };
 
 module.exports = generateSampleData;
