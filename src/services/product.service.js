@@ -97,7 +97,10 @@ const getProductById = async (id) => {
   // return Product.findByPk(id);
   return Product.findOne({
     where: { id },
-    include: [{ model: Asset, as: 'assets' }],
+    include: [
+      { model: Asset, as: 'assets' },
+      { model: Category, as: 'category' },
+    ],
   });
 };
 
@@ -164,10 +167,10 @@ const updateProductById = async (productId, updateBody) => {
       // product.set('properties', existing);
 
       // Flatten the properties object from tree-like to flat (seperated by dots)
-      const flattenedProperties = flattenObject(properties);
+      // const flattenedProperties = flattenObject(properties);
 
       Promise.all(
-        Object.entries(flattenedProperties).map(async ([key, value]) => {
+        Object.entries(properties).map(async ([key, value]) => {
           // For each properties flattened
 
           // Split the key into tokens
@@ -233,10 +236,11 @@ const updateProductById = async (productId, updateBody) => {
       });
 
       // Associate new images set
-      await sequelize.query('UPDATE "Assets" SET "productId" = :productId WHERE "id" IN (:assetIds)', {
-        replacements: { productId, assetIds: [...assets] },
-        type: QueryTypes.UPDATE,
-      });
+      // await sequelize.query('UPDATE "Assets" SET "productId" = :productId WHERE "id" IN (:assetIds)', {
+      //   replacements: { productId, assetIds: [...assets] },
+      //   type: QueryTypes.UPDATE,
+      // });
+      await Asset.update({ productId }, { where: { id: assets }, transaction: t });
     }
 
     Object.assign(product, restOfBody);

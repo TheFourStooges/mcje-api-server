@@ -34,9 +34,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       filename: {
         type: DataTypes.STRING,
-        validate: {
-          is: regexPatterns.filename,
-        },
+        // validate: {
+        //   is: regexPatterns.filename,
+        // },
       },
       fileSize: {
         type: DataTypes.INTEGER,

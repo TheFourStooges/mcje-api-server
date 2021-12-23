@@ -63,7 +63,7 @@ const addOrderPayment = {
       .valid(...orderStatusEnum.orderPaymentType)
       .required(),
     amount: Joi.number().precision(2).positive().required(),
-    currency: Joi.string().min(3).max(3).required().default('VND'),
+    currency: Joi.string().min(3).max(3).default('VND'),
   }),
 };
 
@@ -73,7 +73,7 @@ const addOrderFulfillment = {
   }),
   body: Joi.object().keys({
     description: Joi.string().required(),
-    carrier: Joi.string().required(),
+    carrier: Joi.string(),
     type: Joi.string()
       .valid(...orderStatusEnum.orderFulfillmentType)
       .required(),

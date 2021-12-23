@@ -1,10 +1,12 @@
 const Joi = require('joi');
+const regexPatterns = require('../config/regexPatterns');
 const { password, objectId } = require('./custom.validation');
 
 const createUser = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
+    phone: Joi.string().regex(regexPatterns.phoneNumber),
     name: Joi.string().required(),
     role: Joi.string().required().valid('user', 'admin'),
   }),
@@ -35,6 +37,7 @@ const updateUser = {
       email: Joi.string().email(),
       password: Joi.string().custom(password),
       name: Joi.string(),
+      phone: Joi.string().regex(regexPatterns.phoneNumber),
     })
     .min(1),
 };

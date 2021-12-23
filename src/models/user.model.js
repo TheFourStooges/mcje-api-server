@@ -1,6 +1,7 @@
 // const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { Model, Op } = require('sequelize');
+const regexPatterns = require('../config/regexPatterns');
 // const sequelize = require('../config/sequelize');
 // const { sequelizeToJSON, sequelizePaginate } = require('./plugins');
 const { roles } = require('../config/roles');
@@ -83,6 +84,13 @@ module.exports = (sequelize, DataTypes) => {
         set(value) {
           // Trim string and transform to lowercase
           this.setDataValue('email', String.prototype.toLowerCase.call(value));
+        },
+      },
+      phone: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+          is: regexPatterns.phoneNumber,
         },
       },
       password: {

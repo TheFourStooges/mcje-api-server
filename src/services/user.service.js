@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { User } = require('../models');
+const { User, Order } = require('../models');
 const ApiError = require('../utils/ApiError');
 const paginate = require('../utils/paginate');
 
@@ -35,7 +35,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  return User.findByPk(id);
+  return User.findOne({ where: { id }, include: [{ model: Order, as: 'orders' }] });
 };
 
 /**
@@ -44,7 +44,7 @@ const getUserById = async (id) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = async (email) => {
-  return User.findOne({ where: { email } });
+  return User.findOne({ where: { email }, include: [{ model: Order, as: 'orders' }] });
 };
 
 /**

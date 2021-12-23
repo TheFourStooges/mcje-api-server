@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const { QueryTypes } = require('sequelize');
-const { Order, OrderPayment, OrderFulfillment, sequelize } = require('../models');
+const { Order, OrderPayment, OrderFulfillment, OrderItem, Product, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const flattenObject = require('../utils/flattenObject');
 const paginate = require('../utils/paginate');
@@ -17,7 +17,7 @@ const logger = require('../config/logger');
  * @returns {Promise<QueryResult>}
  */
 const queryOrders = async (filter, options) => {
-  const users = await paginate(Order, filter, options);
+  const users = await paginate(Order, filter, options, [{ model: OrderItem, as: 'orderItems' }]);
   return users;
 };
 
@@ -32,6 +32,7 @@ const getOrderById = async (id) => {
   return Order.findOne({
     where: { id },
     include: [
+      { model: OrderItem, as: 'orderItems', include: [{ model: Product, as: 'product' }] },
       { model: OrderPayment, as: 'orderPayments' },
       { model: OrderFulfillment, as: 'orderFulfillments' },
     ],
@@ -183,7 +184,15 @@ const addOrderPayment = async (orderId, addPaymentBody) => {
 
   const t = await sequelize.transaction();
   try {
-    const payment = await OrderPayment.create({ ...addPaymentBody, orderId });
+    const { transactionId, type, amount, currency } = addPaymentBody;
+
+    const payment = await OrderPayment.create({
+      transactionId,
+      type,
+      amount: type === 'refund' ? -amount : amount,
+      currency,
+      orderId,
+    });
 
     const [result, metadata] = await sequelize.query(
       `
@@ -220,8 +229,9 @@ const addOrderFulfillment = async (orderId, addFulfillmentBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Order not found');
   }
 
-  const { trackingNumber, ...restOfBody } = addFulfillmentBody;
+  const { trackingNumber, carrier, ...restOfBody } = addFulfillmentBody;
   let finalTrackingNumber;
+  let finalCarrier;
 
   const t = await sequelize.transaction();
   try {
@@ -241,8 +251,8 @@ const addOrderFulfillment = async (orderId, addFulfillmentBody) => {
       // If trackingNumber is not provided (meaning no tracking number change)
       const [result, metadata] = await sequelize.query(
         `
-        SELECT "trackingNumber" FROM "OrderFulfillments"
-        WHERE "orderId" = :orderId
+        SELECT "trackingNumber", "carrier" FROM "OrderFulfillments"
+        WHERE "OrderId" = :orderId
         ORDER BY "OrderFulfillments"."createdAt" DESC
         LIMIT 1
         `,
@@ -257,9 +267,15 @@ const addOrderFulfillment = async (orderId, addFulfillmentBody) => {
         throw new ApiError(httpStatus.BAD_REQUEST, 'First FulfillmentHistory entry should have trackingNumber');
       }
       finalTrackingNumber = result.trackingNumber;
+      finalCarrier = result.carrier;
     }
     const fulfillment = await OrderFulfillment.create(
-      { ...restOfBody, OrderId: orderId, trackingNumber: trackingNumber || finalTrackingNumber },
+      {
+        ...restOfBody,
+        OrderId: orderId,
+        trackingNumber: trackingNumber || finalTrackingNumber,
+        carrier: carrier || finalCarrier,
+      },
       { transaction: t }
     );
 

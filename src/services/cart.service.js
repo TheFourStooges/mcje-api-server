@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Cart, CartItem, Product, sequelize } = require('../models');
+const { Cart, CartItem, Product, Asset, sequelize } = require('../models');
 const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
 const { productService } = require('.');
@@ -40,7 +40,13 @@ const getCartById = async (cartId, userId) => {
   console.log('---->', cartId, userId);
   return Cart.findOne({
     where: { id: cartId, userId },
-    include: [{ model: CartItem, as: 'cartItems', include: [{ model: Product, as: 'product' }] }],
+    include: [
+      {
+        model: CartItem,
+        as: 'cartItems',
+        include: [{ model: Product, as: 'product', include: [{ model: Asset, as: 'assets' }] }],
+      },
+    ],
   });
 };
 
