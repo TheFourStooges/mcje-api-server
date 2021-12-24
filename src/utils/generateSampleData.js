@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const slugify = require('slugify');
-const faker = require('faker');
+// const faker = require('faker');
 const attributesEnum = require('../config/enums/attributesEnum');
 const { Product, Category, User, Cart, ShippingMethod, Asset, sequelize } = require('../models');
 const { categoryService, productService } = require('../services');
@@ -108,6 +108,7 @@ const generateCategories = async () => {
   });
 };
 
+/*
 const generateProducts = async () => {
   // const categoryIds = [
   //   'jewelry',
@@ -242,6 +243,7 @@ const generateProducts = async () => {
 
   // Promise.all(products.map((product) => productService.createProduct(product)));
 };
+*/
 
 const generateShippingMethods = async () => {
   const methods = [
@@ -263,7 +265,7 @@ const generateShippingMethods = async () => {
 const generateSampleData = async () => {
   await generateUsers();
   await generateCategories();
-  await generateProducts();
+  // await generateProducts();
   await generateShippingMethods();
 };
 
