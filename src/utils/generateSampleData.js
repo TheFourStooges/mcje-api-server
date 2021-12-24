@@ -25,86 +25,86 @@ const generateUsers = async () => {
 };
 
 const generateCategories = async () => {
-  const jewelry = await categoryService.createCategory({
-    name: 'Jewelry',
-    slug: 'jewelry',
-    description: 'All things jewelry',
-  });
+  // const jewelry = await categoryService.createCategory({
+  //   name: 'Jewelry',
+  //   slug: 'jewelry',
+  //   description: 'All things jewelry',
+  // });
 
   const necklaces = await categoryService.createCategory({
     name: 'Necklaces and Pendants',
     slug: 'necklaces-pendants',
     description: 'Necklaces & Pendants',
-    parentId: { slug: 'jewelry' },
+    // parentId: { slug: 'jewelry' },
   });
 
   const bracelets = await categoryService.createCategory({
     name: 'Bracelets',
     slug: 'bracelets',
     description: 'Bracelets',
-    parentId: { slug: 'jewelry' },
+    // parentId: { slug: 'jewelry' },
   });
 
   const earrings = await categoryService.createCategory({
     name: 'Earrings',
     slug: 'earrings',
     description: 'Earrings',
-    parentId: { slug: 'jewelry' },
+    // parentId: { slug: 'jewelry' },
   });
 
   const rings = await categoryService.createCategory({
     name: 'Rings',
     slug: 'rings',
     description: 'rings',
-    parentId: { slug: 'jewelry' },
+    // parentId: { slug: 'jewelry' },
   });
 
   const brooches = await categoryService.createCategory({
     name: 'Brooches',
     slug: 'brooches',
     description: 'Brooches',
-    parentId: { slug: 'jewelry' },
+    // parentId: { slug: 'jewelry' },
   });
 
   const charms = await categoryService.createCategory({
     name: 'Charms',
     slug: 'charms',
     description: 'Charms',
-    parentId: { slug: 'jewelry' },
+    // parentId: { slug: 'jewelry' },
   });
 
-  const engagement = await categoryService.createCategory({
-    name: 'Love and Engagement',
-    slug: 'engagement',
-    description: 'Love and Engagement',
-  });
+  // const engagement = await categoryService.createCategory({
+  //   name: 'Love and Engagement',
+  //   slug: 'engagement',
+  //   description: 'Love and Engagement',
+  // });
 
   const menEngagementRings = await categoryService.createCategory({
     name: "Men's Engagement Rings",
     slug: 'mens-engagement-rings',
     description: "Men's Engagement Rings",
-    parentId: { slug: 'engagement' },
+    // parentId: { slug: 'engagement' },
   });
 
   const womenEngagementRings = await categoryService.createCategory({
     name: "Women's Engagement Rings",
     slug: 'womens-engagement-rings',
     description: "Women's Engagement Rings",
-    parentId: { slug: 'engagement' },
+    // parentId: { slug: 'engagement' },
   });
 
   const menWeddingBands = await categoryService.createCategory({
     name: "Men's Wedding Bands",
     slug: 'mens-wedding-bands',
     description: "Men's Wedding Bands",
-    parentId: { slug: 'engagement' },
+    // parentId: { slug: 'engagement' },
   });
 
   const womenWeddingBands = await categoryService.createCategory({
     name: "Women's Wedding Bands",
     slug: 'womens-wedding-bands',
     description: "Women's Wedding Bands",
-    parentId: { slug: 'engagement' },
+    // parentId: { slug: 'engagement' },
   });
 };
 
@@ -161,7 +161,8 @@ const generateProducts = async () => {
         name,
         slug,
         description: faker.commerce.productDescription(),
-        basePrice: faker.commerce.price(),
+        basePrice: faker.commerce.price() * 23000,
+        quantity: Math.floor(Math.random() * 100 + 1),
         categoryId,
         properties: {
           productType,
@@ -212,14 +213,29 @@ const generateProducts = async () => {
               {
                 path: `/public/data/uploads/anh${Math.floor(Math.random() * 14) + 1}.png`,
               },
+              {
+                path: `/public/data/uploads/anh${Math.floor(Math.random() * 14) + 1}.png`,
+              },
+              {
+                path: `/public/data/uploads/anh${Math.floor(Math.random() * 14) + 1}.png`,
+              },
+              {
+                path: `/public/data/uploads/anh${Math.floor(Math.random() * 14) + 1}.png`,
+              },
+              {
+                path: `/public/data/uploads/anh${Math.floor(Math.random() * 14) + 1}.png`,
+              },
             ],
           },
-          { include: [{ model: Asset, as: 'assets' }] }
+          { include: [{ model: Asset, as: 'assets' }], transaction: t }
         )
       )
     );
+
+    await t.commit();
   } catch (error) {
     await t.rollback();
+    console.log(error);
   }
 
   // Product.bulkCreate(products, { validate: true, benchmark: true });
@@ -232,12 +248,12 @@ const generateShippingMethods = async () => {
     {
       description: 'Giao hang tiet kiem',
       provider: 'GHTK',
-      price: 0.99,
+      price: 10000,
     },
     {
       description: 'Giao hang dat tien',
       provider: 'GHDT',
-      price: 690.99,
+      price: 99999.99,
     },
   ];
 
@@ -245,10 +261,10 @@ const generateShippingMethods = async () => {
 };
 
 const generateSampleData = async () => {
-  // await generateUsers();
-  // await generateCategories();
+  await generateUsers();
+  await generateCategories();
   await generateProducts();
-  // await generateShippingMethods();
+  await generateShippingMethods();
 };
 
 module.exports = generateSampleData;
