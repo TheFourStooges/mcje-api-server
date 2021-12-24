@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
 const { Cart, CartItem, Product, Asset, sequelize } = require('../models');
+const { Op } = require('sequelize');
 const ApiError = require('../utils/ApiError');
 const config = require('../config/config');
 const { productService } = require('.');
@@ -39,7 +40,7 @@ const createCart = async (userId) => {
 const getCartById = async (cartId, userId) => {
   console.log('---->', cartId, userId);
   return Cart.findOne({
-    where: { id: cartId, userId },
+    where: { id: cartId, userId, status: { [Op.ne]: 'captured' } },
     include: [
       {
         model: CartItem,
@@ -281,7 +282,7 @@ const updateItemInCart = async (cartId, userId, lineItemId, requestBody) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error);
   }
 
-  return cartItem.reload();
+  return cart.reload();
 };
 
 const deleteItemInCart = async (cartId, userId, lineItemId) => {

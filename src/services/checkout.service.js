@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { Op } = require('sequelize');
 const {
   Cart,
   CartItem,
@@ -148,7 +149,7 @@ const generateCheckoutToken = async (userId, cartId) => {
 
 const getCheckoutTokenById = async (userId, checkoutTokenId) => {
   const checkoutToken = await CheckoutToken.findOne({
-    where: { id: checkoutTokenId, userId },
+    where: { id: checkoutTokenId, userId, status: { [Op.ne]: 'captured' } },
     include: [
       {
         model: Cart,
