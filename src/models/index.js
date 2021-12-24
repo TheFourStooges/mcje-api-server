@@ -16,6 +16,11 @@ const db = {};
 console.log(config.sql.url, typeof config.sql.url);
 const sequelize = new Sequelize(config.sql.url, {
   logging: logger.debug.bind(logger),
+  dialectOptions: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
 });
 
 // eslint-disable-next-line security/detect-non-literal-fs-filename
