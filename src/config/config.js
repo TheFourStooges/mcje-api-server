@@ -8,7 +8,7 @@ const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     PORT: Joi.number().default(3000),
-    MONGODB_URL: Joi.string().required().description('Mongo DB url'),
+    // MONGODB_URL: Joi.string().required().description('Mongo DB url'),
     SQL_DIALECT: Joi.string().required().description('Sequlize: dialect, see documentation'),
     SQL_HOST: Joi.string().required().description('Sequelize: server hostname/address'),
     SQL_DATABASE: Joi.string().required().description('Sequelize: database name'),
@@ -58,14 +58,14 @@ module.exports = {
   checkout: {
     expirationDays: envVars.CHECKOUT_EXPIRATION_DAYS,
   },
-  mongoose: {
-    url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
-    options: {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    },
-  },
+  // mongoose: {
+  //   url: envVars.MONGODB_URL + (envVars.NODE_ENV === 'test' ? '-test' : ''),
+  //   options: {
+  //     useCreateIndex: true,
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true,
+  //   },
+  // },
   jwt: {
     secret: envVars.JWT_SECRET,
     accessExpirationMinutes: envVars.JWT_ACCESS_EXPIRATION_MINUTES,
